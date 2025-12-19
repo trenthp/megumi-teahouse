@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Megumi's Usagi Cafe | 兎茶店</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cherry+Bomb+One&family=Outfit:wght@300;400;500;600;700&family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Floating Boba Particles Background -->
+    <div class="boba-particles" id="bobaParticles"></div>
+
+    <!-- Navigation -->
+    <nav class="main-nav">
+        <div class="nav-inner">
+            <div class="nav-logo">
+                <img src="images/logo_hero_2.svg" alt="Megumi's Usagi Cafe" class="logo-icon">
+            </div>
+            <div class="nav-links">
+                <button class="nav-link active" data-page="home">home</button>
+                <button class="nav-link" data-page="menu">menu</button>
+                <button class="nav-link" data-page="rabbits">rabbits</button>
+                <button class="nav-link" data-page="passport">passport</button>
+                <button class="nav-link" data-page="shop">shop</button>
+            </div>
+            <div class="nav-actions">
+                <button class="cart-btn" id="cartBtn">
+                    <span class="cart-icon">🧋</span>
+                    <span class="cart-count" id="cartCount">0</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Nav Toggle -->
+    <button class="mobile-nav-toggle" id="mobileNavToggle">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+
+        <!-- HOME PAGE -->
+        <section class="page page-home active" id="page-home">
+            <div class="hero">
+                <div class="hero-content">
+                    <div class="hero-title">
+                        <img src="images/logo_mascot.png" alt="Megumi" class="hero-logo-img">
+                        <span class="title-en">Megumi's Usagi Cafe</span>
+                    </div>
+                    <p class="hero-tagline">i bite.</p>
+                    <p class="hero-desc">Bubble tea & bunny friends. Collect stamps, meet our rabbits, unlock exclusive goodies.</p>
+                    <div class="hero-actions">
+                        <button class="btn btn-primary" data-navigate="menu">Order Now</button>
+                        <button class="btn btn-secondary" data-navigate="rabbits">Meet the Buns</button>
+                    </div>
+                </div>
+                <div class="hero-mascot">
+                    <img src="images/logo_hero.png" alt="兎茶店" class="hero-mascot-img bounce-slow">
+                </div>
+            </div>
+
+            <!-- Daily Rabbit Check-in -->
+            <div class="daily-checkin" id="dailyCheckin">
+                <div class="checkin-card">
+                    <div class="checkin-rabbit" id="checkinRabbit"></div>
+                    <div class="checkin-content">
+                        <h3>Daily Bun Visit</h3>
+                        <p class="checkin-message" id="checkinMessage"></p>
+                        <button class="btn btn-small" id="checkinBtn">Say Hi!</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="quick-stats">
+                <div class="stat-card bounce-hover">
+                    <span class="stat-icon">🍵</span>
+                    <span class="stat-value" id="statDrinks">0</span>
+                    <span class="stat-label">drinks ordered</span>
+                </div>
+                <div class="stat-card bounce-hover">
+                    <span class="stat-icon">🐇</span>
+                    <span class="stat-value" id="statVisits">0</span>
+                    <span class="stat-label">rabbit visits</span>
+                </div>
+                <div class="stat-card bounce-hover">
+                    <span class="stat-icon">⭐</span>
+                    <span class="stat-value" id="statStamps">0</span>
+                    <span class="stat-label">stamps collected</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- MENU PAGE -->
+        <section class="page page-menu" id="page-menu">
+            <div class="page-header">
+                <h2 class="page-title">Our Drinks</h2>
+                <p class="page-subtitle">handcrafted with love (and a little spite)</p>
+            </div>
+
+            <div class="menu-filters">
+                <button class="filter-btn active" data-filter="all">All</button>
+                <button class="filter-btn" data-filter="signature">Signature</button>
+                <button class="filter-btn" data-filter="classic">Classic</button>
+                <button class="filter-btn" data-filter="seasonal">Seasonal</button>
+            </div>
+
+            <div class="menu-grid" id="menuGrid">
+                <!-- Drinks populated by JS -->
+            </div>
+
+            <!-- Drink Detail Modal -->
+            <div class="modal drink-modal" id="drinkModal">
+                <div class="modal-content drink-card-detail">
+                    <button class="modal-close" id="drinkModalClose">&times;</button>
+                    <div class="drink-card-inner" id="drinkCardInner">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- RABBITS PAGE -->
+        <section class="page page-rabbits" id="page-rabbits">
+            <div class="page-header">
+                <h2 class="page-title">Our Rabbits</h2>
+                <p class="page-subtitle">they might let you pet them. no promises.</p>
+            </div>
+
+            <div class="rabbits-grid" id="rabbitsGrid">
+                <!-- Rabbit cards populated by JS -->
+            </div>
+
+            <!-- Rabbit Detail Modal -->
+            <div class="modal rabbit-modal" id="rabbitModal">
+                <div class="modal-content rabbit-card-detail">
+                    <button class="modal-close" id="rabbitModalClose">&times;</button>
+                    <div class="rabbit-card-inner" id="rabbitCardInner">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PASSPORT PAGE -->
+        <section class="page page-passport" id="page-passport">
+            <div class="page-header">
+                <h2 class="page-title">Stamp Passport</h2>
+                <p class="page-subtitle">collect stamps, unlock rewards</p>
+            </div>
+
+            <div class="passport-book">
+                <div class="passport-cover">
+                    <div class="passport-title">
+                        <span class="passport-jp">兎茶店</span>
+                        <span class="passport-en">Stamp Passport</span>
+                    </div>
+                    <div class="passport-owner" id="passportOwner">Guest</div>
+                </div>
+
+                <div class="passport-pages">
+                    <div class="stamp-grid" id="stampGrid">
+                        <!-- Stamps populated by JS -->
+                    </div>
+                </div>
+
+                <div class="passport-rewards">
+                    <h3>Rewards</h3>
+                    <div class="rewards-list" id="rewardsList">
+                        <!-- Rewards populated by JS -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SHOP PAGE -->
+        <section class="page page-shop" id="page-shop">
+            <div class="page-header">
+                <h2 class="page-title">Bunny Shop</h2>
+                <p class="page-subtitle">exclusive goodies for stamp collectors</p>
+            </div>
+
+            <div class="shop-grid" id="shopGrid">
+                <!-- Shop items populated by JS -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Cart Sidebar -->
+    <aside class="cart-sidebar" id="cartSidebar">
+        <div class="cart-header">
+            <h3>Your Order</h3>
+            <button class="cart-close" id="cartClose">&times;</button>
+        </div>
+        <div class="cart-items" id="cartItems">
+            <!-- Cart items populated by JS -->
+        </div>
+        <div class="cart-footer">
+            <div class="cart-total">
+                <span>Total</span>
+                <span id="cartTotal">$0.00</span>
+            </div>
+            <div class="cart-pickup">
+                <label for="pickupTime">Pickup Time</label>
+                <input type="datetime-local" id="pickupTime" class="pickup-input">
+            </div>
+            <button class="btn btn-primary btn-full" id="checkoutBtn">Place Order</button>
+            <p class="cart-note">+1 stamp per drink!</p>
+        </div>
+    </aside>
+
+    <!-- Schedule Visit Modal -->
+    <div class="modal schedule-modal" id="scheduleModal">
+        <div class="modal-content">
+            <button class="modal-close" id="scheduleModalClose">&times;</button>
+            <h3>Schedule a Visit</h3>
+            <div class="schedule-form" id="scheduleForm">
+                <div class="form-group">
+                    <label>Choose a Rabbit</label>
+                    <select id="scheduleRabbit" class="form-select">
+                        <!-- Options populated by JS -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Select Date & Time</label>
+                    <input type="datetime-local" id="scheduleTime" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label>Duration</label>
+                    <select id="scheduleDuration" class="form-select">
+                        <option value="15">15 minutes</option>
+                        <option value="30" selected>30 minutes</option>
+                        <option value="60">1 hour</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary btn-full" id="confirmSchedule">Book Visit (+2 stamps)</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="footer-content">
+            <div class="footer-mascot">
+                <span class="footer-rabbit" title="*chomp*">🐰</span>
+                <span class="footer-knife">🔪</span>
+            </div>
+            <div class="footer-info">
+                <p class="footer-tagline">1-800-COME-GET-BIT</p>
+                <p class="footer-copy">© 2024 Megumi's Usagi Cafe | 兎茶店</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="js/data.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
