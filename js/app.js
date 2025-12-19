@@ -186,9 +186,9 @@ function initMenu() {
 
 // Background images for drink modal
 const drinkBackgrounds = [
-    'images/references/reference image 1.png',
-    'images/references/reference image 2.png',
-    'images/references/reference image 3.png'
+    'images/reference image 1.png',
+    'images/reference image 2.png',
+    'images/reference image 3.png'
 ];
 
 function openDrinkModal(drinkId) {
