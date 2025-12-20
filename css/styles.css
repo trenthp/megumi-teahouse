@@ -439,12 +439,12 @@ h3 { font-size: clamp(1.25rem, 3vw, 1.75rem); }
     gap: var(--space-2xl);
     align-items: center;
     padding: var(--space-xl) 0;
-    padding-top: 0px;
     padding-bottom: 64px;
 }
 
 .hero-content {
     animation: slideInLeft 0.8s var(--bounce-soft);
+    text-align: center;
 }
 
 @keyframes slideInLeft {
@@ -468,7 +468,7 @@ h3 { font-size: clamp(1.25rem, 3vw, 1.75rem); }
     width: clamp(250px, 50vw, 450px);
     height: auto;
     margin: auto;
-    margin-bottom: var(--space-sm);
+    padding-top: var(--space-lg);
 }
 
 .title-en {
@@ -1749,7 +1749,8 @@ h3 { font-size: clamp(1.25rem, 3vw, 1.75rem); }
     }
 
     .hero-logo-img {
-        display: none;
+        width: clamp(250px, 30vw, 450px);
+        /*display: none;*/
     } 
 
     .hero-mascot {
