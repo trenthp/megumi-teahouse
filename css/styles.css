@@ -962,7 +962,7 @@ h3 { font-size: clamp(1.25rem, 3vw, 1.75rem); }
 .rabbit-modal .modal-content {
     max-width: 450px;
     padding: 0;
-    overflow: hidden;
+    overflow-y: auto;
 }
 
 .rabbit-card-detail {
@@ -1044,7 +1044,7 @@ h3 { font-size: clamp(1.25rem, 3vw, 1.75rem); }
 .drink-modal .modal-content {
     max-width: 420px;
     padding: 0;
-    overflow: hidden;
+    overflow-y: auto;
 }
 
 .drink-card-detail {
@@ -2140,4 +2140,673 @@ h3 { font-size: clamp(1.25rem, 3vw, 1.75rem); }
 .rabbit-rarity {
     border: 2px solid var(--ink);
     font-weight: 700;
+}
+
+/* ============================================
+   NEW FEATURES - Friendship, Leaderboard, etc.
+   ============================================ */
+
+/* ---------- Drink Bun Match (Cross-sell) ---------- */
+.drink-bun-match {
+    background: var(--gradient-sakura);
+    border: 2px solid var(--ink);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    margin: var(--space-md) 0;
+    box-shadow: 3px 3px 0 var(--ink);
+}
+
+.bun-match-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    margin-bottom: var(--space-sm);
+}
+
+.bun-match-emoji {
+    font-size: 2rem;
+}
+
+.bun-match-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.bun-match-label {
+    font-weight: 600;
+    color: var(--text-dark);
+    font-size: 0.9rem;
+}
+
+.bun-match-friendship {
+    font-size: 0.8rem;
+    color: var(--text-medium);
+}
+
+/* ---------- Rabbit Friendship Display ---------- */
+.rabbit-friendship-display {
+    background: var(--gradient-ocean);
+    border: 2px solid var(--ink);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    margin: var(--space-md) 0;
+    text-align: center;
+}
+
+.friendship-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-sm);
+}
+
+.friendship-icon {
+    font-size: 1.5rem;
+}
+
+.friendship-name {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--text-dark);
+}
+
+.friendship-progress-bar {
+    width: 100%;
+    height: 12px;
+    background: var(--white);
+    border: 2px solid var(--ink);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+    margin-bottom: var(--space-sm);
+}
+
+.friendship-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent-pink), var(--accent-purple));
+    border-radius: var(--radius-full);
+    transition: width 0.5s var(--bounce);
+}
+
+.friendship-perk {
+    font-size: 0.85rem;
+    color: var(--text-medium);
+    font-style: italic;
+}
+
+/* ---------- Rabbit Signatures Section ---------- */
+.rabbit-signatures {
+    margin: var(--space-lg) 0;
+    padding: var(--space-md);
+    background: var(--cream);
+    border: 2px solid var(--ink);
+    border-radius: var(--radius-md);
+}
+
+.rabbit-signatures h4 {
+    font-family: 'Cherry Bomb One', cursive;
+    color: var(--accent-purple);
+    margin-bottom: var(--space-md);
+}
+
+.signature-items {
+    display: flex;
+    gap: var(--space-md);
+    flex-wrap: wrap;
+}
+
+.signature-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    background: var(--white);
+    padding: var(--space-sm) var(--space-md);
+    border: 2px solid var(--ink);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.2s var(--bounce);
+}
+
+.signature-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 3px 3px 0 var(--ink);
+}
+
+.signature-cup {
+    width: 24px;
+    height: 32px;
+    border-radius: 4px 4px 8px 8px;
+}
+
+.signature-icon {
+    font-size: 1.3rem;
+}
+
+/* ---------- Leaderboard Page ---------- */
+.page-leaderboard {
+    padding-bottom: var(--space-3xl);
+}
+
+.leaderboard-podium {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    gap: var(--space-md);
+    margin-bottom: var(--space-2xl);
+    padding: var(--space-xl) 0;
+}
+
+.podium-spot {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    transition: transform 0.2s var(--bounce);
+}
+
+.podium-spot:hover {
+    transform: translateY(-5px);
+}
+
+.podium-emoji {
+    font-size: 2.5rem;
+    margin-bottom: var(--space-sm);
+    animation: bunnyBounce 2s infinite;
+}
+
+.podium-name {
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-bottom: var(--space-sm);
+    color: var(--text-dark);
+}
+
+.podium-block {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 80px;
+    font-size: 1.5rem;
+    border: 3px solid var(--ink);
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+}
+
+.podium-1 .podium-block {
+    height: 100px;
+    background: linear-gradient(180deg, #FFD700 0%, #FFC107 100%);
+}
+
+.podium-2 .podium-block {
+    height: 70px;
+    background: linear-gradient(180deg, #C0C0C0 0%, #A8A8A8 100%);
+}
+
+.podium-3 .podium-block {
+    height: 50px;
+    background: linear-gradient(180deg, #CD7F32 0%, #B87333 100%);
+}
+
+.leaderboard-grid {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.leaderboard-card {
+    display: grid;
+    grid-template-columns: auto 1fr auto auto;
+    align-items: center;
+    gap: var(--space-md);
+    padding: var(--space-md) var(--space-lg);
+    background: var(--white);
+    border: 3px solid var(--ink);
+    border-radius: var(--radius-lg);
+    transition: all 0.2s var(--bounce);
+}
+
+.leaderboard-card:hover {
+    transform: translateX(5px);
+    box-shadow: 5px 5px 0 var(--ink);
+}
+
+.leaderboard-card.rank-1 {
+    background: linear-gradient(135deg, #FFF9E8 0%, #FFE8A0 100%);
+    border-color: #B8860B;
+}
+
+.leaderboard-card.rank-2 {
+    background: linear-gradient(135deg, #F8F8F8 0%, #E8E8E8 100%);
+}
+
+.leaderboard-card.rank-3 {
+    background: linear-gradient(135deg, #FFF0E8 0%, #FFD4B0 100%);
+}
+
+.leaderboard-rank {
+    font-size: 1.5rem;
+    min-width: 40px;
+    text-align: center;
+}
+
+.leaderboard-rabbit {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+}
+
+.leaderboard-emoji {
+    font-size: 2rem;
+}
+
+.leaderboard-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.leaderboard-name {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--text-dark);
+}
+
+.leaderboard-title {
+    font-size: 0.8rem;
+    color: var(--text-light);
+}
+
+.leaderboard-stats {
+    display: flex;
+    gap: var(--space-lg);
+}
+
+.leaderboard-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 60px;
+}
+
+.leaderboard-stat .stat-value {
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--text-dark);
+}
+
+.leaderboard-stat .stat-label {
+    font-size: 0.7rem;
+    color: var(--text-light);
+    text-transform: uppercase;
+}
+
+.leaderboard-info-box {
+    max-width: 600px;
+    margin: var(--space-2xl) auto 0;
+    padding: var(--space-lg);
+    background: var(--cream);
+    border: 3px solid var(--ink);
+    border-radius: var(--radius-lg);
+    text-align: center;
+}
+
+.leaderboard-info h4 {
+    font-family: 'Cherry Bomb One', cursive;
+    color: var(--accent-purple);
+    margin-bottom: var(--space-md);
+}
+
+.leaderboard-info p {
+    color: var(--text-medium);
+    margin-bottom: var(--space-md);
+}
+
+.ranking-tips {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-lg);
+    flex-wrap: wrap;
+}
+
+.tip {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-sm) var(--space-md);
+    background: var(--white);
+    border: 2px solid var(--ink);
+    border-radius: var(--radius-md);
+}
+
+.tip-icon {
+    font-size: 1.2rem;
+}
+
+/* ---------- Schedule Modal Addons ---------- */
+.schedule-modal-content {
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-md);
+}
+
+.schedule-addons {
+    margin-top: var(--space-lg);
+    padding-top: var(--space-lg);
+    border-top: 2px dashed var(--ink-light);
+}
+
+.schedule-addons h4 {
+    font-family: 'Cherry Bomb One', cursive;
+    color: var(--accent-purple);
+    margin-bottom: var(--space-xs);
+    font-size: 1rem;
+}
+
+.addon-hint {
+    font-size: 0.8rem;
+    color: var(--text-light);
+    margin-bottom: var(--space-md);
+}
+
+.addon-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: var(--space-sm);
+    margin-bottom: var(--space-lg);
+}
+
+.addon-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--space-sm);
+    background: var(--white);
+    border: 2px solid var(--ink);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.2s var(--bounce);
+    text-align: center;
+    position: relative;
+}
+
+.addon-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 3px 3px 0 var(--ink);
+}
+
+.addon-item input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.addon-item:has(input:checked) {
+    background: var(--gradient-sakura);
+    border-color: var(--accent-pink);
+    box-shadow: 3px 3px 0 var(--accent-pink);
+}
+
+.addon-icon {
+    font-size: 1.5rem;
+    margin-bottom: var(--space-xs);
+}
+
+.addon-name {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-dark);
+    line-height: 1.2;
+}
+
+.addon-price {
+    font-size: 0.7rem;
+    color: var(--text-light);
+    margin-top: var(--space-xs);
+}
+
+/* ---------- Responsive Leaderboard ---------- */
+@media (max-width: 768px) {
+    .leaderboard-card {
+        grid-template-columns: auto 1fr;
+        grid-template-rows: auto auto;
+    }
+
+    .leaderboard-stats {
+        grid-column: 1 / -1;
+        justify-content: flex-start;
+        padding-left: 50px;
+    }
+
+    .leaderboard-card button {
+        grid-column: 1 / -1;
+        margin-top: var(--space-sm);
+    }
+
+    .podium-spot {
+        flex: 1;
+    }
+
+    .podium-block {
+        width: 100%;
+        max-width: 80px;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .addon-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .ranking-tips {
+        flex-direction: column;
+        align-items: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .leaderboard-stats {
+        gap: var(--space-md);
+        padding-left: var(--space-md);
+    }
+
+    .addon-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .podium-emoji {
+        font-size: 2rem;
+    }
+
+    .podium-block {
+        width: 60px;
+    }
+
+    .podium-1 .podium-block { height: 80px; }
+    .podium-2 .podium-block { height: 55px; }
+    .podium-3 .podium-block { height: 40px; }
+}
+
+/* ---------- Menu Section Divider ---------- */
+.menu-section-divider {
+    text-align: center;
+    margin: var(--space-3xl) 0 var(--space-xl);
+    padding: var(--space-lg) 0;
+    border-top: 3px dashed var(--ink-light);
+}
+
+.menu-section-divider h3 {
+    font-family: 'Cherry Bomb One', cursive;
+    font-size: 1.8rem;
+    color: var(--text-dark);
+    margin-bottom: var(--space-xs);
+}
+
+.menu-section-divider p {
+    color: var(--text-light);
+    font-size: 0.9rem;
+}
+
+/* ---------- Snacks Grid ---------- */
+.snacks-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: var(--space-lg);
+    padding: 0 var(--space-md);
+}
+
+.snack-card {
+    display: flex;
+    gap: var(--space-md);
+    padding: var(--space-md);
+    background: var(--white);
+    border: 3px solid var(--ink);
+    border-radius: var(--radius-lg);
+    transition: all 0.2s var(--bounce);
+    position: relative;
+}
+
+.snack-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 5px 5px 0 var(--ink);
+}
+
+.snack-icon {
+    font-size: 2.5rem;
+    min-width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--gradient-sunset);
+    border: 2px solid var(--ink);
+    border-radius: var(--radius-md);
+}
+
+.snack-rabbit-badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    font-size: 1.2rem;
+    background: var(--white);
+    border: 2px solid var(--ink);
+    border-radius: var(--radius-full);
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 2px 2px 0 var(--ink);
+}
+
+.snack-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.snack-name {
+    font-family: 'Cherry Bomb One', cursive;
+    font-size: 1rem;
+    color: var(--text-dark);
+    margin-bottom: var(--space-xs);
+}
+
+.snack-desc {
+    font-size: 0.8rem;
+    color: var(--text-medium);
+    flex: 1;
+    line-height: 1.4;
+}
+
+.snack-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: var(--space-sm);
+}
+
+.snack-price {
+    font-weight: 700;
+    color: var(--accent-purple);
+    font-size: 1rem;
+}
+
+.snack-add {
+    width: 32px;
+    height: 32px;
+    border: 2px solid var(--ink);
+    border-radius: var(--radius-full);
+    background: var(--mint);
+    font-size: 1.2rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s var(--bounce);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.snack-add:hover {
+    background: var(--mint-deep);
+    transform: scale(1.1);
+    box-shadow: 2px 2px 0 var(--ink);
+}
+
+/* ---------- Drink Rabbit Badge ---------- */
+.drink-rabbit-badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    font-size: 1.2rem;
+    background: var(--white);
+    border: 2px solid var(--ink);
+    border-radius: var(--radius-full);
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 2px 2px 0 var(--ink);
+    z-index: 2;
+}
+
+.drink-visual {
+    position: relative;
+}
+
+/* ---------- Your Contribution Badge ---------- */
+.your-contribution {
+    display: block;
+    font-size: 0.7rem;
+    color: var(--accent-pink);
+    font-weight: 600;
+    margin-top: 2px;
+}
+
+/* ---------- Cart Snack Items ---------- */
+.cart-item-snack {
+    background: var(--gradient-sunset) !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+}
+
+/* ---------- Responsive Snacks ---------- */
+@media (max-width: 600px) {
+    .snacks-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .snack-card {
+        flex-direction: row;
+    }
 }

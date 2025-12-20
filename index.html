@@ -23,6 +23,7 @@
                 <button class="nav-link active" data-page="home">home</button>
                 <button class="nav-link" data-page="menu">menu</button>
                 <button class="nav-link" data-page="rabbits">rabbits</button>
+                <button class="nav-link" data-page="leaderboard">rankings</button>
                 <button class="nav-link" data-page="passport">passport</button>
                 <button class="nav-link" data-page="shop">shop</button>
             </div>
@@ -109,11 +110,21 @@
                 <button class="filter-btn active" data-filter="all">All</button>
                 <button class="filter-btn" data-filter="signature">Signature</button>
                 <button class="filter-btn" data-filter="classic">Classic</button>
+                <button class="filter-btn" data-filter="yogurt">Rice Yogurt</button>
                 <button class="filter-btn" data-filter="seasonal">Seasonal</button>
             </div>
 
             <div class="menu-grid" id="menuGrid">
                 <!-- Drinks populated by JS -->
+            </div>
+
+            <div class="menu-section-divider">
+                <h3>Snacks & Treats</h3>
+                <p>pair with your drink or grab for the road</p>
+            </div>
+
+            <div class="snacks-grid" id="snacksGrid">
+                <!-- Snacks populated by JS -->
             </div>
 
             <!-- Drink Detail Modal -->
@@ -144,6 +155,41 @@
                     <button class="modal-close" id="rabbitModalClose">&times;</button>
                     <div class="rabbit-card-inner" id="rabbitCardInner">
                         <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- LEADERBOARD PAGE -->
+        <section class="page page-leaderboard" id="page-leaderboard">
+            <div class="page-header">
+                <h2 class="page-title">Bun Rankings</h2>
+                <p class="page-subtitle">support your favorite bun to the top!</p>
+            </div>
+
+            <div class="leaderboard-podium" id="leaderboardPodium">
+                <!-- Top 3 podium populated by JS -->
+            </div>
+
+            <div class="leaderboard-grid" id="leaderboardGrid">
+                <!-- Rankings populated by JS -->
+            </div>
+
+            <div class="leaderboard-info">
+                <h4>How Rankings Work</h4>
+                <p>Buns are ranked by total support from customers. Spend money on visits, treats, and toys to push your favorite bun to #1!</p>
+                <div class="ranking-tips">
+                    <div class="tip">
+                        <span class="tip-icon">🎫</span>
+                        <span>Book visits ($10-30)</span>
+                    </div>
+                    <div class="tip">
+                        <span class="tip-icon">🥕</span>
+                        <span>Give treats ($2-4)</span>
+                    </div>
+                    <div class="tip">
+                        <span class="tip-icon">🧩</span>
+                        <span>Buy toys ($5-12)</span>
                     </div>
                 </div>
             </div>
@@ -218,7 +264,7 @@
 
     <!-- Schedule Visit Modal -->
     <div class="modal schedule-modal" id="scheduleModal">
-        <div class="modal-content">
+        <div class="modal-content schedule-modal-content">
             <button class="modal-close" id="scheduleModalClose">&times;</button>
             <h3>Schedule a Visit</h3>
             <div class="schedule-form" id="scheduleForm">
@@ -228,18 +274,105 @@
                         <!-- Options populated by JS -->
                     </select>
                 </div>
-                <div class="form-group">
-                    <label>Select Date & Time</label>
-                    <input type="datetime-local" id="scheduleTime" class="form-input">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Select Date & Time</label>
+                        <input type="datetime-local" id="scheduleTime" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label>Duration</label>
+                        <select id="scheduleDuration" class="form-select">
+                            <option value="15">15 min - $10</option>
+                            <option value="30" selected>30 min - $18</option>
+                            <option value="60">1 hour - $30</option>
+                        </select>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label>Duration</label>
-                    <select id="scheduleDuration" class="form-select">
-                        <option value="15">15 minutes</option>
-                        <option value="30" selected>30 minutes</option>
-                        <option value="60">1 hour</option>
-                    </select>
+
+                <div class="schedule-addons">
+                    <h4>Add Treats for Your Bun</h4>
+                    <p class="addon-hint">Treats increase friendship!</p>
+                    <div class="addon-grid treats-grid">
+                        <label class="addon-item">
+                            <input type="checkbox" class="treat-checkbox" value="premium-hay">
+                            <span class="addon-icon">🌾</span>
+                            <span class="addon-name">Premium Hay</span>
+                            <span class="addon-price">$3.00</span>
+                        </label>
+                        <label class="addon-item">
+                            <input type="checkbox" class="treat-checkbox" value="banana-chip">
+                            <span class="addon-icon">🍌</span>
+                            <span class="addon-name">Banana Chips</span>
+                            <span class="addon-price">$2.50</span>
+                        </label>
+                        <label class="addon-item">
+                            <input type="checkbox" class="treat-checkbox" value="apple-slice">
+                            <span class="addon-icon">🍎</span>
+                            <span class="addon-name">Apple Slices</span>
+                            <span class="addon-price">$2.00</span>
+                        </label>
+                        <label class="addon-item">
+                            <input type="checkbox" class="treat-checkbox" value="carrot-sticks">
+                            <span class="addon-icon">🥕</span>
+                            <span class="addon-name">Carrot Sticks</span>
+                            <span class="addon-price">$2.00</span>
+                        </label>
+                        <label class="addon-item">
+                            <input type="checkbox" class="treat-checkbox" value="herbal-mix">
+                            <span class="addon-icon">🌿</span>
+                            <span class="addon-name">Herbal Mix</span>
+                            <span class="addon-price">$4.00</span>
+                        </label>
+                        <label class="addon-item">
+                            <input type="checkbox" class="treat-checkbox" value="papaya-treats">
+                            <span class="addon-icon">🧡</span>
+                            <span class="addon-name">Papaya Treats</span>
+                            <span class="addon-price">$3.50</span>
+                        </label>
+                    </div>
+
+                    <h4>Add Toys for Your Bun</h4>
+                    <p class="addon-hint">Toys give bonus friendship points!</p>
+                    <div class="addon-grid toys-grid">
+                        <label class="addon-item">
+                            <input type="checkbox" class="toy-checkbox" value="willow-ball">
+                            <span class="addon-icon">⚽</span>
+                            <span class="addon-name">Willow Ball</span>
+                            <span class="addon-price">$5.00</span>
+                        </label>
+                        <label class="addon-item">
+                            <input type="checkbox" class="toy-checkbox" value="tunnel">
+                            <span class="addon-icon">🕳️</span>
+                            <span class="addon-name">Bunny Tunnel</span>
+                            <span class="addon-price">$12.00</span>
+                        </label>
+                        <label class="addon-item">
+                            <input type="checkbox" class="toy-checkbox" value="stacking-cups">
+                            <span class="addon-icon">🥤</span>
+                            <span class="addon-name">Stacking Cups</span>
+                            <span class="addon-price">$8.00</span>
+                        </label>
+                        <label class="addon-item">
+                            <input type="checkbox" class="toy-checkbox" value="dig-box">
+                            <span class="addon-icon">📦</span>
+                            <span class="addon-name">Dig Box</span>
+                            <span class="addon-price">$6.00</span>
+                        </label>
+                        <label class="addon-item">
+                            <input type="checkbox" class="toy-checkbox" value="treat-puzzle">
+                            <span class="addon-icon">🧩</span>
+                            <span class="addon-name">Treat Puzzle</span>
+                            <span class="addon-price">$10.00</span>
+                        </label>
+                        <label class="addon-item">
+                            <input type="checkbox" class="toy-checkbox" value="plush-carrot">
+                            <span class="addon-icon">🥕</span>
+                            <span class="addon-name">Plush Carrot</span>
+                            <span class="addon-price">$7.00</span>
+                        </label>
+                    </div>
                 </div>
+
                 <button class="btn btn-primary btn-full" id="confirmSchedule">Book Visit (+2 stamps)</button>
             </div>
         </div>

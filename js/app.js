@@ -14,8 +14,84 @@ const state = {
     lastCheckin: null,
     checkedInToday: false,
     unlockedRewards: [],
-    currentPage: 'home'
+    currentPage: 'home',
+    // Friendship tracking per rabbit
+    friendships: {},
+    // Total spent on each rabbit (for leaderboard)
+    rabbitSpending: {}
 };
+
+// Initialize friendships for all rabbits
+function initFriendships() {
+    RABBITS.forEach(rabbit => {
+        if (!state.friendships[rabbit.id]) {
+            state.friendships[rabbit.id] = {
+                points: 0,
+                visits: 0,
+                treatsGiven: 0,
+                toysGiven: 0
+            };
+        }
+        if (!state.rabbitSpending[rabbit.id]) {
+            state.rabbitSpending[rabbit.id] = 0;
+        }
+    });
+}
+
+// Get friendship level for a rabbit
+function getFriendshipLevel(rabbitId) {
+    const points = state.friendships[rabbitId]?.points || 0;
+    let currentLevel = FRIENDSHIP_LEVELS[0];
+    for (const level of FRIENDSHIP_LEVELS) {
+        if (points >= level.minPoints) {
+            currentLevel = level;
+        }
+    }
+    return currentLevel;
+}
+
+// Add friendship points for a rabbit
+function addFriendshipPoints(rabbitId, points, type = 'general') {
+    if (!state.friendships[rabbitId]) {
+        state.friendships[rabbitId] = { points: 0, visits: 0, treatsGiven: 0, toysGiven: 0 };
+    }
+
+    const oldLevel = getFriendshipLevel(rabbitId);
+    state.friendships[rabbitId].points += points;
+
+    if (type === 'visit') state.friendships[rabbitId].visits++;
+    if (type === 'treat') state.friendships[rabbitId].treatsGiven++;
+    if (type === 'toy') state.friendships[rabbitId].toysGiven++;
+
+    const newLevel = getFriendshipLevel(rabbitId);
+    const rabbit = RABBITS.find(r => r.id === rabbitId);
+
+    // Check for level up
+    if (newLevel.level > oldLevel.level && rabbit) {
+        showToast(`${rabbit.name} friendship leveled up to ${newLevel.name}!`, newLevel.icon);
+    }
+
+    saveState();
+}
+
+// Add spending for leaderboard
+function addRabbitSpending(rabbitId, amount) {
+    if (!state.rabbitSpending[rabbitId]) {
+        state.rabbitSpending[rabbitId] = 0;
+    }
+    state.rabbitSpending[rabbitId] += amount;
+    saveState();
+}
+
+// Get leaderboard rankings
+function getLeaderboard() {
+    return RABBITS.map(rabbit => ({
+        ...rabbit,
+        totalSpending: state.rabbitSpending[rabbit.id] || 0,
+        friendship: state.friendships[rabbit.id] || { points: 0, visits: 0 },
+        friendshipLevel: getFriendshipLevel(rabbit.id)
+    })).sort((a, b) => b.totalSpending - a.totalSpending);
+}
 
 // Load state from localStorage
 function loadState() {
@@ -49,6 +125,9 @@ function initNavigation() {
     const navLinksContainer = document.querySelector('.nav-links');
 
     function navigateTo(pageId) {
+        // Close any open modals first
+        closeAllModals();
+
         // Update nav links
         navLinks.forEach(link => {
             link.classList.toggle('active', link.dataset.page === pageId);
@@ -80,6 +159,13 @@ function initNavigation() {
     mobileToggle.addEventListener('click', () => {
         navLinksContainer.classList.toggle('open');
     });
+
+    // Escape key closes modals
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            closeAllModals();
+        }
+    });
 }
 
 // ============================================
@@ -109,14 +195,26 @@ function lockScroll() {
 }
 
 function unlockScroll() {
+    // Only unlock if no modals or sidebars are open
+    const anyModalOpen = document.querySelector('.modal.open');
+    const cartOpen = document.getElementById('cartSidebar')?.classList.contains('open');
+
+    if (!anyModalOpen && !cartOpen) {
+        document.body.classList.remove('no-scroll');
+    }
+}
+
+// Force unlock scroll (use when you're sure nothing should be open)
+function forceUnlockScroll() {
     document.body.classList.remove('no-scroll');
 }
 
 // ============================================
-// MENU / DRINKS
+// MENU / DRINKS & SNACKS
 // ============================================
 function initMenu() {
     const menuGrid = document.getElementById('menuGrid');
+    const snacksGrid = document.getElementById('snacksGrid');
     const filterBtns = document.querySelectorAll('.filter-btn');
     const drinkModal = document.getElementById('drinkModal');
     const drinkModalClose = document.getElementById('drinkModalClose');
@@ -126,23 +224,29 @@ function initMenu() {
             ? DRINKS
             : DRINKS.filter(d => d.category === filter);
 
-        menuGrid.innerHTML = filteredDrinks.map(drink => `
-            <div class="drink-card" data-drink-id="${drink.id}">
-                <div class="drink-visual">
-                    <div class="drink-cup" style="background: ${drink.gradient}">
-                        <div class="drink-straw"></div>
+        menuGrid.innerHTML = filteredDrinks.map(drink => {
+            const matchingRabbit = drink.rabbitId ? RABBITS.find(r => r.id === drink.rabbitId) : null;
+            const rabbitBadge = matchingRabbit ? `<span class="drink-rabbit-badge" title="${matchingRabbit.name}'s signature">${matchingRabbit.emoji}</span>` : '';
+
+            return `
+                <div class="drink-card" data-drink-id="${drink.id}">
+                    <div class="drink-visual">
+                        <div class="drink-cup" style="background: ${drink.gradient}">
+                            <div class="drink-straw"></div>
+                        </div>
+                        ${rabbitBadge}
+                    </div>
+                    <div class="drink-info">
+                        <h3 class="drink-name">${drink.name}</h3>
+                        <p class="drink-desc">${drink.description}</p>
+                        <div class="drink-footer">
+                            <span class="drink-price">$${drink.price.toFixed(2)}</span>
+                            <button class="drink-add" data-add-drink="${drink.id}">+</button>
+                        </div>
                     </div>
                 </div>
-                <div class="drink-info">
-                    <h3 class="drink-name">${drink.name}</h3>
-                    <p class="drink-desc">${drink.description}</p>
-                    <div class="drink-footer">
-                        <span class="drink-price">$${drink.price.toFixed(2)}</span>
-                        <button class="drink-add" data-add-drink="${drink.id}">+</button>
-                    </div>
-                </div>
-            </div>
-        `).join('');
+            `;
+        }).join('');
 
         // Add event listeners to add buttons
         document.querySelectorAll('[data-add-drink]').forEach(btn => {
@@ -158,6 +262,30 @@ function initMenu() {
                 openDrinkModal(card.dataset.drinkId);
             });
         });
+    }
+
+    function renderSnacks() {
+        if (!snacksGrid) return;
+
+        snacksGrid.innerHTML = SNACKS.map(snack => {
+            const matchingRabbit = snack.rabbitId ? RABBITS.find(r => r.id === snack.rabbitId) : null;
+            const rabbitBadge = matchingRabbit ? `<span class="snack-rabbit-badge" title="${matchingRabbit.name}'s favorite">${matchingRabbit.emoji}</span>` : '';
+
+            return `
+                <div class="snack-card">
+                    <div class="snack-icon">${snack.icon}</div>
+                    ${rabbitBadge}
+                    <div class="snack-info">
+                        <h3 class="snack-name">${snack.name}</h3>
+                        <p class="snack-desc">${snack.description}</p>
+                        <div class="snack-footer">
+                            <span class="snack-price">$${snack.price.toFixed(2)}</span>
+                            <button class="snack-add" onclick="addSnackToCart('${snack.id}')">+</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
     }
 
     // Modal close handlers
@@ -182,6 +310,38 @@ function initMenu() {
     });
 
     renderDrinks();
+    renderSnacks();
+}
+
+// Add snack to cart
+function addSnackToCart(snackId) {
+    const snack = SNACKS.find(s => s.id === snackId);
+    if (!snack) return;
+
+    const existingItem = state.cart.find(item => item.id === snackId);
+    if (existingItem) {
+        existingItem.quantity++;
+    } else {
+        state.cart.push({
+            id: snack.id,
+            name: snack.name,
+            price: snack.price,
+            gradient: 'linear-gradient(180deg, #FFE8D9 0%, #FFF9F5 100%)',
+            icon: snack.icon,
+            isSnack: true,
+            quantity: 1
+        });
+    }
+
+    saveState();
+    renderCart();
+    showToast(`Added ${snack.name} to cart!`, snack.icon);
+
+    // Bounce the cart button
+    const cartBtn = document.getElementById('cartBtn');
+    cartBtn.style.animation = 'none';
+    cartBtn.offsetHeight;
+    cartBtn.style.animation = 'cartBounce 0.5s var(--bounce)';
 }
 
 // Background images for drink modal
@@ -201,6 +361,28 @@ function openDrinkModal(drinkId) {
     // Pick a random background
     const bgImage = drinkBackgrounds[Math.floor(Math.random() * drinkBackgrounds.length)];
 
+    // Find matching rabbit if this is a signature drink
+    const matchingRabbit = drink.rabbitId ? RABBITS.find(r => r.id === drink.rabbitId) : null;
+    const friendshipLevel = matchingRabbit ? getFriendshipLevel(matchingRabbit.id) : null;
+
+    let rabbitSection = '';
+    if (matchingRabbit) {
+        rabbitSection = `
+            <div class="drink-bun-match">
+                <div class="bun-match-header">
+                    <span class="bun-match-emoji">${matchingRabbit.emoji}</span>
+                    <div class="bun-match-info">
+                        <span class="bun-match-label">${matchingRabbit.name}'s Signature Drink!</span>
+                        <span class="bun-match-friendship">${friendshipLevel.icon} ${friendshipLevel.name}</span>
+                    </div>
+                </div>
+                <button class="btn btn-secondary btn-small" onclick="openScheduleFromDrink('${matchingRabbit.id}')">
+                    + Add Time with ${matchingRabbit.name}
+                </button>
+            </div>
+        `;
+    }
+
     inner.innerHTML = `
         <div class="drink-detail-visual" style="background-image: url('${bgImage}')">
             <div class="drink-detail-cup" style="background: ${drink.gradient}">
@@ -214,6 +396,7 @@ function openDrinkModal(drinkId) {
             </div>
             <span class="drink-detail-category">${drink.category}</span>
             <p class="drink-detail-desc">${drink.description}</p>
+            ${rabbitSection}
             <div class="drink-detail-toppings">
                 <h4>Customize Your Drink</h4>
                 <div class="topping-list">
@@ -232,6 +415,12 @@ function openDrinkModal(drinkId) {
 
     modal.classList.add('open');
     lockScroll();
+}
+
+// Open schedule modal from drink modal (cross-sell)
+function openScheduleFromDrink(rabbitId) {
+    document.getElementById('drinkModal').classList.remove('open');
+    openScheduleModal(rabbitId);
 }
 
 function addToCartAndClose(drinkId) {
@@ -329,20 +518,26 @@ function renderCart() {
         return;
     }
 
-    cartItems.innerHTML = state.cart.map(item => `
-        <div class="cart-item">
-            <div class="cart-item-visual" style="background: ${item.gradient}"></div>
-            <div class="cart-item-info">
-                <div class="cart-item-name">${item.name}</div>
-                <div class="cart-item-price">$${item.price.toFixed(2)}</div>
+    cartItems.innerHTML = state.cart.map(item => {
+        const visual = item.isSnack
+            ? `<div class="cart-item-visual cart-item-snack">${item.icon}</div>`
+            : `<div class="cart-item-visual" style="background: ${item.gradient}"></div>`;
+
+        return `
+            <div class="cart-item">
+                ${visual}
+                <div class="cart-item-info">
+                    <div class="cart-item-name">${item.name}</div>
+                    <div class="cart-item-price">$${item.price.toFixed(2)}</div>
+                </div>
+                <div class="cart-item-qty">
+                    <button class="qty-btn" onclick="updateCartQuantity('${item.id}', -1)">-</button>
+                    <span>${item.quantity}</span>
+                    <button class="qty-btn" onclick="updateCartQuantity('${item.id}', 1)">+</button>
+                </div>
             </div>
-            <div class="cart-item-qty">
-                <button class="qty-btn" onclick="updateCartQuantity('${item.id}', -1)">-</button>
-                <span>${item.quantity}</span>
-                <button class="qty-btn" onclick="updateCartQuantity('${item.id}', 1)">+</button>
-            </div>
-        </div>
-    `).join('');
+        `;
+    }).join('');
 }
 
 function handleCheckout() {
@@ -449,13 +644,56 @@ function openRabbitModal(rabbitId) {
     const modal = document.getElementById('rabbitModal');
     const inner = document.getElementById('rabbitCardInner');
 
+    // Get friendship info
+    const friendshipLevel = getFriendshipLevel(rabbit.id);
+    const friendshipData = state.friendships[rabbit.id] || { points: 0, visits: 0 };
+    const nextLevel = FRIENDSHIP_LEVELS.find(l => l.minPoints > friendshipData.points);
+    const progressToNext = nextLevel
+        ? ((friendshipData.points - friendshipLevel.minPoints) / (nextLevel.minPoints - friendshipLevel.minPoints)) * 100
+        : 100;
+
+    // Get signature items
+    const signatureDrink = DRINKS.find(d => d.id === rabbit.signatureDrink);
+    const signatureSnack = SNACKS.find(s => s.id === rabbit.signatureSnack);
+
     inner.innerHTML = `
         <div class="rabbit-detail-header">
             <span class="rabbit-detail-emoji">${rabbit.emoji}</span>
             <h2 class="rabbit-detail-name">${rabbit.name}</h2>
             <p class="rabbit-detail-title">${rabbit.title}</p>
         </div>
+
+        <div class="rabbit-friendship-display">
+            <div class="friendship-badge">
+                <span class="friendship-icon">${friendshipLevel.icon}</span>
+                <span class="friendship-name">${friendshipLevel.name}</span>
+            </div>
+            <div class="friendship-progress-bar">
+                <div class="friendship-progress-fill" style="width: ${progressToNext}%"></div>
+            </div>
+            <p class="friendship-perk">${friendshipLevel.perk}</p>
+        </div>
+
+        <div class="rabbit-signatures">
+            <h4>Signature Items</h4>
+            <div class="signature-items">
+                ${signatureDrink ? `
+                    <div class="signature-item" onclick="navigateAndOpenDrink('${signatureDrink.id}')">
+                        <div class="signature-cup" style="background: ${signatureDrink.gradient}"></div>
+                        <span>${signatureDrink.name}</span>
+                    </div>
+                ` : ''}
+                ${signatureSnack ? `
+                    <div class="signature-item">
+                        <span class="signature-icon">${signatureSnack.icon}</span>
+                        <span>${signatureSnack.name}</span>
+                    </div>
+                ` : ''}
+            </div>
+        </div>
+
         <p class="rabbit-detail-bio">${rabbit.bio}</p>
+
         <div class="rabbit-detail-stats">
             <div class="detail-stat">
                 <span class="detail-stat-label">Fluffiness</span>
@@ -497,6 +735,28 @@ function openRabbitModal(rabbitId) {
 
     modal.classList.add('open');
     lockScroll();
+}
+
+// Navigate to menu and open drink modal
+function navigateAndOpenDrink(drinkId) {
+    document.getElementById('rabbitModal').classList.remove('open');
+    unlockScroll();
+    // Navigate to menu page
+    const navLinks = document.querySelectorAll('.nav-link');
+    const pages = document.querySelectorAll('.page');
+    navLinks.forEach(link => link.classList.toggle('active', link.dataset.page === 'menu'));
+    pages.forEach(page => page.classList.toggle('active', page.id === 'page-menu'));
+    state.currentPage = 'menu';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Small delay then open drink modal
+    setTimeout(() => openDrinkModal(drinkId), 300);
+}
+
+// Close all modals and unlock scroll
+function closeAllModals() {
+    document.querySelectorAll('.modal').forEach(modal => modal.classList.remove('open'));
+    document.getElementById('cartSidebar')?.classList.remove('open');
+    forceUnlockScroll();
 }
 
 // ============================================
@@ -553,19 +813,61 @@ function handleScheduleVisit() {
 
     const rabbit = RABBITS.find(r => r.id === rabbitId);
 
+    // Calculate cost based on duration
+    const durationPrices = { '15': 10, '30': 18, '60': 30 };
+    const visitCost = durationPrices[duration] || 18;
+
+    // Get selected treats and toys
+    const selectedTreats = Array.from(document.querySelectorAll('.treat-checkbox:checked'))
+        .map(cb => BUN_TREATS.find(t => t.id === cb.value));
+    const selectedToys = Array.from(document.querySelectorAll('.toy-checkbox:checked'))
+        .map(cb => BUN_TOYS.find(t => t.id === cb.value));
+
+    // Calculate totals
+    const treatsCost = selectedTreats.reduce((sum, t) => sum + (t?.price || 0), 0);
+    const toysCost = selectedToys.reduce((sum, t) => sum + (t?.price || 0), 0);
+    const totalCost = visitCost + treatsCost + toysCost;
+
     // Add stamps for booking
     state.stamps += 2;
     state.rabbitVisits++;
+
+    // Add friendship points (base + treats + toys)
+    const baseFriendshipPoints = parseInt(duration) / 5; // 3 for 15min, 6 for 30min, 12 for 60min
+    let totalFriendshipPoints = baseFriendshipPoints;
+
+    selectedTreats.forEach(treat => {
+        if (treat) {
+            totalFriendshipPoints += treat.friendshipPoints;
+            addFriendshipPoints(rabbitId, treat.friendshipPoints, 'treat');
+        }
+    });
+
+    selectedToys.forEach(toy => {
+        if (toy) {
+            totalFriendshipPoints += toy.friendshipPoints;
+            addFriendshipPoints(rabbitId, toy.friendshipPoints, 'toy');
+        }
+    });
+
+    // Add base visit points
+    addFriendshipPoints(rabbitId, baseFriendshipPoints, 'visit');
+
+    // Add spending for leaderboard
+    addRabbitSpending(rabbitId, totalCost);
 
     checkRewardUnlocks();
     saveState();
     updateStats();
     renderPassport();
+    renderLeaderboard();
 
     document.getElementById('scheduleModal').classList.remove('open');
     unlockScroll();
 
-    showToast(`Visit with ${rabbit.name} booked! +2 stamps!`, rabbit.emoji);
+    const treatsMsg = selectedTreats.length > 0 ? ` +${selectedTreats.length} treats` : '';
+    const toysMsg = selectedToys.length > 0 ? ` +${selectedToys.length} toys` : '';
+    showToast(`Visit with ${rabbit.name} booked!${treatsMsg}${toysMsg} +2 stamps!`, rabbit.emoji);
 }
 
 // ============================================
@@ -642,6 +944,131 @@ function initShop() {
             </div>
         `;
     }).join('');
+}
+
+// ============================================
+// LEADERBOARD (Host Club Style Rankings)
+// Community-wide rankings based on total support
+// ============================================
+
+// Simulated community spending data (base values that user adds to)
+const COMMUNITY_BASE_SPENDING = {
+    'megumi': 4250.00,    // The Boss is popular
+    'mochi': 3890.50,     // Everyone loves the sweetheart
+    'boba': 2150.25,      // Troublemaker has fans
+    'taro': 1875.00,      // Philosopher has dedicated followers
+    'peach': 3200.75,     // Diva demands attention
+    'sesame': 980.50,     // Shy one has quiet supporters
+    'matcha': 2450.00,    // Energizer is fun
+    'honey': 2890.25      // Foodie is relatable
+};
+
+const COMMUNITY_BASE_VISITS = {
+    'megumi': 142,
+    'mochi': 128,
+    'boba': 76,
+    'taro': 62,
+    'peach': 108,
+    'sesame': 34,
+    'matcha': 85,
+    'honey': 97
+};
+
+function initLeaderboard() {
+    renderLeaderboard();
+}
+
+// Get community leaderboard (base + user contribution)
+function getCommunityLeaderboard() {
+    return RABBITS.map(rabbit => {
+        const userSpending = state.rabbitSpending[rabbit.id] || 0;
+        const userVisits = state.friendships[rabbit.id]?.visits || 0;
+        const communitySpending = COMMUNITY_BASE_SPENDING[rabbit.id] + userSpending;
+        const communityVisits = COMMUNITY_BASE_VISITS[rabbit.id] + userVisits;
+
+        return {
+            ...rabbit,
+            communitySpending,
+            communityVisits,
+            userSpending,
+            userVisits,
+            userFriendship: state.friendships[rabbit.id] || { points: 0, visits: 0 },
+            userFriendshipLevel: getFriendshipLevel(rabbit.id)
+        };
+    }).sort((a, b) => b.communitySpending - a.communitySpending);
+}
+
+function renderLeaderboard() {
+    const leaderboardGrid = document.getElementById('leaderboardGrid');
+    if (!leaderboardGrid) return;
+
+    const rankings = getCommunityLeaderboard();
+
+    leaderboardGrid.innerHTML = rankings.map((rabbit, index) => {
+        const rank = index + 1;
+        const rankClass = rank === 1 ? 'rank-1' : rank === 2 ? 'rank-2' : rank === 3 ? 'rank-3' : '';
+        const rankIcon = rank === 1 ? '👑' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `#${rank}`;
+        const yourContribution = rabbit.userSpending > 0 ? `<span class="your-contribution">(You: $${rabbit.userSpending.toFixed(2)})</span>` : '';
+
+        return `
+            <div class="leaderboard-card ${rankClass}" data-rabbit-id="${rabbit.id}">
+                <div class="leaderboard-rank">${rankIcon}</div>
+                <div class="leaderboard-rabbit">
+                    <span class="leaderboard-emoji">${rabbit.emoji}</span>
+                    <div class="leaderboard-info">
+                        <span class="leaderboard-name">${rabbit.name}</span>
+                        <span class="leaderboard-title">${rabbit.personality}</span>
+                    </div>
+                </div>
+                <div class="leaderboard-stats">
+                    <div class="leaderboard-stat">
+                        <span class="stat-value">$${rabbit.communitySpending.toFixed(0)}</span>
+                        <span class="stat-label">Total Support</span>
+                        ${yourContribution}
+                    </div>
+                    <div class="leaderboard-stat">
+                        <span class="stat-value">${rabbit.communityVisits}</span>
+                        <span class="stat-label">Visits</span>
+                    </div>
+                    <div class="leaderboard-stat">
+                        <span class="stat-value">${rabbit.userFriendshipLevel.icon}</span>
+                        <span class="stat-label">Your Bond</span>
+                    </div>
+                </div>
+                <button class="btn btn-small btn-secondary" onclick="openRabbitFromLeaderboard('${rabbit.id}')">
+                    Support ${rabbit.name}
+                </button>
+            </div>
+        `;
+    }).join('');
+
+    // Update top 3 podium if it exists
+    const podium = document.getElementById('leaderboardPodium');
+    if (podium && rankings.length >= 3) {
+        podium.innerHTML = `
+            <div class="podium-spot podium-2" onclick="openRabbitFromLeaderboard('${rankings[1].id}')">
+                <span class="podium-emoji">${rankings[1].emoji}</span>
+                <span class="podium-name">${rankings[1].name}</span>
+                <div class="podium-block">🥈</div>
+            </div>
+            <div class="podium-spot podium-1" onclick="openRabbitFromLeaderboard('${rankings[0].id}')">
+                <span class="podium-emoji">${rankings[0].emoji}</span>
+                <span class="podium-name">${rankings[0].name}</span>
+                <div class="podium-block">👑</div>
+            </div>
+            <div class="podium-spot podium-3" onclick="openRabbitFromLeaderboard('${rankings[2].id}')">
+                <span class="podium-emoji">${rankings[2].emoji}</span>
+                <span class="podium-name">${rankings[2].name}</span>
+                <div class="podium-block">🥉</div>
+            </div>
+        `;
+    }
+}
+
+// Open rabbit modal from leaderboard (ensures scroll is handled properly)
+function openRabbitFromLeaderboard(rabbitId) {
+    closeAllModals();
+    setTimeout(() => openRabbitModal(rabbitId), 50);
 }
 
 // ============================================
@@ -729,6 +1156,7 @@ function showToast(message, icon = '🐰') {
 // ============================================
 document.addEventListener('DOMContentLoaded', () => {
     loadState();
+    initFriendships();
     initBobaParticles();
     initNavigation();
     initMenu();
@@ -737,6 +1165,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initScheduling();
     initPassport();
     initShop();
+    initLeaderboard();
     initDailyCheckin();
     updateStats();
 
@@ -755,3 +1184,9 @@ document.addEventListener('DOMContentLoaded', () => {
 window.updateCartQuantity = updateCartQuantity;
 window.openScheduleModal = openScheduleModal;
 window.addToCartAndClose = addToCartAndClose;
+window.openScheduleFromDrink = openScheduleFromDrink;
+window.navigateAndOpenDrink = navigateAndOpenDrink;
+window.openRabbitModal = openRabbitModal;
+window.openRabbitFromLeaderboard = openRabbitFromLeaderboard;
+window.closeAllModals = closeAllModals;
+window.addSnackToCart = addSnackToCart;
