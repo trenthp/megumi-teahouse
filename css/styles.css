@@ -439,6 +439,7 @@ h3 { font-size: clamp(1.25rem, 3vw, 1.75rem); }
     gap: var(--space-2xl);
     align-items: center;
     padding: var(--space-xl) 0;
+    padding-top: 0px;
     padding-bottom: 64px;
 }
 
@@ -466,6 +467,7 @@ h3 { font-size: clamp(1.25rem, 3vw, 1.75rem); }
     max-width: 64%;
     width: clamp(250px, 50vw, 450px);
     height: auto;
+    margin: auto;
     margin-bottom: var(--space-sm);
 }
 
@@ -475,6 +477,7 @@ h3 { font-size: clamp(1.25rem, 3vw, 1.75rem); }
     font-size: clamp(1.1rem, 2.5vw, 1.75rem);
     color: var(--accent-purple);
     font-weight: 400;
+    text-align: center;
 }
 
 .hero-tagline {
@@ -1744,6 +1747,10 @@ h3 { font-size: clamp(1.25rem, 3vw, 1.75rem); }
     .hero-content {
         order: 2;
     }
+
+    .hero-logo-img {
+        display: none;
+    } 
 
     .hero-mascot {
         order: 1;
