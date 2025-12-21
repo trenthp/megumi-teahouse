@@ -10,6 +10,7 @@ const state = {
     cart: [],
     stamps: 0,
     drinksOrdered: 0,
+    snacksOrdered: 0,
     rabbitVisits: 0,
     lastCheckin: null,
     checkedInToday: false,
@@ -18,7 +19,25 @@ const state = {
     // Friendship tracking per rabbit
     friendships: {},
     // Total spent on each rabbit (for leaderboard)
-    rabbitSpending: {}
+    rabbitSpending: {},
+    // Achievement tracking
+    unlockedAchievements: [],
+    totalStampsEarned: 0,
+    totalSpent: 0,
+    signatureDrinksTried: [],
+    uniqueBunsVisited: [],
+    treatsGivenTotal: 0,
+    toysPlayedTotal: 0,
+    hasVisited: false,
+    // User profile
+    userName: '',
+    userAvatar: '🐰',
+    memberSince: null,
+    // Order history
+    orderHistory: [],
+    visitHistory: [],
+    // Shop purchases
+    purchasedItems: []
 };
 
 // Initialize friendships for all rabbits
@@ -96,6 +115,208 @@ function getLeaderboard() {
         friendship: state.friendships[rabbit.id] || { points: 0, visits: 0 },
         friendshipLevel: getFriendshipLevelForRabbit(rabbit.id)
     })).sort((a, b) => b.totalSpending - a.totalSpending);
+}
+
+// ============================================
+// ACHIEVEMENT SYSTEM
+// ============================================
+
+// Check if an achievement condition is met
+function checkAchievementCondition(achievement) {
+    const cond = achievement.condition;
+
+    switch (cond.type) {
+        case 'first_visit':
+            return state.hasVisited;
+
+        case 'drinks_ordered':
+            return state.drinksOrdered >= cond.count;
+
+        case 'snacks_ordered':
+            return state.snacksOrdered >= cond.count;
+
+        case 'sessions_booked':
+            return state.rabbitVisits >= cond.count;
+
+        case 'friendship_level':
+            // Check if any rabbit has reached this level
+            return Object.keys(state.friendships).some(rabbitId => {
+                const level = getFriendshipLevelForRabbit(rabbitId);
+                return level.name === cond.level;
+            });
+
+        case 'friends_count':
+            // Count how many rabbits have reached the specified level
+            const friendsAtLevel = Object.keys(state.friendships).filter(rabbitId => {
+                const level = getFriendshipLevelForRabbit(rabbitId);
+                const levelIndex = FRIENDSHIP_LEVELS.findIndex(l => l.name === level.name);
+                const requiredIndex = FRIENDSHIP_LEVELS.findIndex(l => l.name === cond.level);
+                return levelIndex >= requiredIndex;
+            }).length;
+            return friendsAtLevel >= cond.count;
+
+        case 'signature_drinks_tried':
+            return state.signatureDrinksTried.length >= cond.count;
+
+        case 'unique_buns_visited':
+            return state.uniqueBunsVisited.length >= cond.count;
+
+        case 'stamps_earned':
+            return state.totalStampsEarned >= cond.count;
+
+        case 'total_spent':
+            return state.totalSpent >= cond.amount;
+
+        case 'rarity_visited':
+            // Check if user has visited a bun of this rarity
+            return state.uniqueBunsVisited.some(rabbitId => {
+                const rabbit = getRabbitById(rabbitId);
+                return rabbit && rabbit.rarity === cond.rarity;
+            });
+
+        case 'all_rarity_visited':
+            // Check if user has visited ALL buns of this rarity
+            const bunsOfRarity = RABBITS.filter(r => r.rarity === cond.rarity);
+            return bunsOfRarity.every(r => state.uniqueBunsVisited.includes(r.id));
+
+        case 'achievements_unlocked':
+            return state.unlockedAchievements.length >= cond.count;
+
+        case 'treats_given':
+            return state.treatsGivenTotal >= cond.count;
+
+        case 'toys_played':
+            return state.toysPlayedTotal >= cond.count;
+
+        default:
+            return false;
+    }
+}
+
+// Check all achievements and unlock any newly earned ones
+function checkAchievements() {
+    const newlyUnlocked = [];
+
+    ACHIEVEMENTS.forEach(achievement => {
+        // Skip if already unlocked
+        if (state.unlockedAchievements.includes(achievement.id)) {
+            return;
+        }
+
+        // Check if condition is met
+        if (checkAchievementCondition(achievement)) {
+            state.unlockedAchievements.push(achievement.id);
+            newlyUnlocked.push(achievement);
+
+            // Award stamps reward
+            if (achievement.reward && achievement.reward.stamps) {
+                state.stamps += achievement.reward.stamps;
+                state.totalStampsEarned += achievement.reward.stamps;
+            }
+        }
+    });
+
+    // Show notifications for newly unlocked achievements
+    newlyUnlocked.forEach((achievement, index) => {
+        setTimeout(() => {
+            showAchievementUnlock(achievement);
+        }, index * 1500); // Stagger notifications
+    });
+
+    if (newlyUnlocked.length > 0) {
+        saveState();
+        // Re-check for meta achievements (like "unlock 20 achievements")
+        setTimeout(() => checkAchievements(), 2000);
+    }
+
+    return newlyUnlocked;
+}
+
+// Show achievement unlock notification
+function showAchievementUnlock(achievement) {
+    const category = ACHIEVEMENT_CATEGORIES[achievement.category];
+
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = 'achievement-notification';
+    notification.innerHTML = `
+        <div class="achievement-notification-content">
+            <div class="achievement-notification-sticker">${achievement.sticker}</div>
+            <div class="achievement-notification-info">
+                <div class="achievement-notification-header">
+                    <span class="achievement-notification-label">Achievement Unlocked!</span>
+                </div>
+                <div class="achievement-notification-name">${achievement.name}</div>
+                <div class="achievement-notification-reward">+${achievement.reward.stamps} stamps</div>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(notification);
+
+    // Animate in
+    requestAnimationFrame(() => {
+        notification.classList.add('show');
+    });
+
+    // Remove after delay
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => notification.remove(), 500);
+    }, 4000);
+}
+
+// Get achievement progress for display
+function getAchievementProgress(achievement) {
+    const cond = achievement.condition;
+    let current = 0;
+    let total = cond.count || cond.amount || 1;
+
+    switch (cond.type) {
+        case 'first_visit':
+            current = state.hasVisited ? 1 : 0;
+            total = 1;
+            break;
+        case 'drinks_ordered':
+            current = state.drinksOrdered;
+            break;
+        case 'snacks_ordered':
+            current = state.snacksOrdered;
+            break;
+        case 'sessions_booked':
+            current = state.rabbitVisits;
+            break;
+        case 'signature_drinks_tried':
+            current = state.signatureDrinksTried.length;
+            break;
+        case 'unique_buns_visited':
+            current = state.uniqueBunsVisited.length;
+            break;
+        case 'stamps_earned':
+            current = state.totalStampsEarned;
+            break;
+        case 'total_spent':
+            current = state.totalSpent;
+            break;
+        case 'achievements_unlocked':
+            current = state.unlockedAchievements.length;
+            break;
+        case 'treats_given':
+            current = state.treatsGivenTotal;
+            break;
+        case 'toys_played':
+            current = state.toysPlayedTotal;
+            break;
+        case 'friendship_level':
+        case 'friends_count':
+        case 'rarity_visited':
+        case 'all_rarity_visited':
+            // These are boolean/complex, show as 0/1 or current count
+            current = checkAchievementCondition(achievement) ? total : 0;
+            break;
+    }
+
+    return { current: Math.min(current, total), total };
 }
 
 // Load state from localStorage
@@ -327,7 +548,7 @@ function initMenu() {
 }
 
 // Add snack to cart
-function addSnackToCart(snackId) {
+function addSnackToCart(snackId, suppressUpsell = false) {
     const snack = SNACKS.find(s => s.id === snackId);
     if (!snack) return;
 
@@ -342,13 +563,26 @@ function addSnackToCart(snackId) {
             gradient: 'linear-gradient(180deg, #FFE8D9 0%, #FFF9F5 100%)',
             icon: snack.icon,
             isSnack: true,
+            rabbitId: snack.rabbitId || null,
             quantity: 1
         });
     }
 
     saveState();
     renderCart();
-    showToast(`Added ${snack.name} to cart!`, snack.icon);
+
+    // Check if this is a signature snack and show upsell toast
+    // (unless suppressed because user is already in a bun context)
+    if (!suppressUpsell && snack.rabbitId) {
+        const rabbit = getRabbitById(snack.rabbitId);
+        if (rabbit) {
+            showUpsellToast(snack.name, rabbit, 'snack');
+        } else {
+            showToast(`Added ${snack.name} to cart!`, snack.icon);
+        }
+    } else {
+        showToast(`Added ${snack.name} to cart!`, snack.icon);
+    }
 
     // Bounce the cart button
     const cartBtn = document.getElementById('cartBtn');
@@ -454,7 +688,8 @@ function openScheduleFromDrink(rabbitId) {
 }
 
 function addToCartAndClose(drinkId) {
-    addToCart(drinkId);
+    // Suppress upsell since drink modal already shows bun cross-sell
+    addToCart(drinkId, true);
     document.getElementById('drinkModal').classList.remove('open');
     unlockScroll();
 }
@@ -491,20 +726,35 @@ function initCart() {
     renderCart();
 }
 
-function addToCart(drinkId) {
+function addToCart(drinkId, suppressUpsell = false) {
     const drink = DRINKS.find(d => d.id === drinkId);
     if (!drink) return;
+
+    // Check if this is a signature drink
+    const isSignature = SIGNATURE_DRINKS.some(sd => sd.id === drinkId);
 
     const existingItem = state.cart.find(item => item.id === drinkId);
     if (existingItem) {
         existingItem.quantity++;
     } else {
-        state.cart.push({ ...drink, quantity: 1 });
+        state.cart.push({ ...drink, quantity: 1, isSignature });
     }
 
     saveState();
     renderCart();
-    showToast(`Added ${drink.name} to cart!`, '🧋');
+
+    // Check if this is a signature drink and show upsell toast
+    // (unless suppressed because user is already in a bun context)
+    if (!suppressUpsell && drink.rabbitId) {
+        const rabbit = getRabbitById(drink.rabbitId);
+        if (rabbit) {
+            showUpsellToast(drink.name, rabbit, 'drink');
+        } else {
+            showToast(`Added ${drink.name} to cart!`, '🧋');
+        }
+    } else {
+        showToast(`Added ${drink.name} to cart!`, '🧋');
+    }
 
     // Bounce the cart button
     const cartBtn = document.getElementById('cartBtn');
@@ -655,10 +905,47 @@ function handleCheckout() {
 
     // Calculate stamps earned (1 per drink, not snacks)
     const drinksCount = state.cart.filter(item => !item.isSnack).reduce((sum, item) => sum + item.quantity, 0);
+    const snacksCount = state.cart.filter(item => item.isSnack).reduce((sum, item) => sum + item.quantity, 0);
     const totalItems = state.cart.reduce((sum, item) => sum + item.quantity, 0);
 
+    // Calculate total cost for spending tracking
+    const cartTotal = state.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
     state.stamps += drinksCount;
+    state.totalStampsEarned += drinksCount;
     state.drinksOrdered += drinksCount;
+    state.snacksOrdered += snacksCount;
+    state.totalSpent += cartTotal;
+
+    // Track signature drinks tried for achievements
+    state.cart.forEach(item => {
+        if (!item.isSnack && item.isSignature && !state.signatureDrinksTried.includes(item.id)) {
+            state.signatureDrinksTried.push(item.id);
+        }
+    });
+
+    // Save order to history
+    const order = {
+        id: Date.now(),
+        date: new Date().toISOString(),
+        items: state.cart.map(item => ({
+            id: item.id,
+            name: item.name,
+            price: item.price,
+            quantity: item.quantity,
+            isSnack: item.isSnack || false,
+            isSignature: item.isSignature || false
+        })),
+        total: cartTotal,
+        stampsEarned: drinksCount,
+        pickupTime: pickupTime
+    };
+    state.orderHistory.unshift(order); // Add to beginning
+
+    // Keep only last 50 orders
+    if (state.orderHistory.length > 50) {
+        state.orderHistory = state.orderHistory.slice(0, 50);
+    }
 
     // Show success overlay
     const cartSuccess = document.getElementById('cartSuccess');
@@ -670,6 +957,9 @@ function handleCheckout() {
 
     // Check for newly unlocked rewards
     checkRewardUnlocks();
+
+    // Check for achievements
+    checkAchievements();
 
     // Clear cart after a delay
     setTimeout(() => {
@@ -879,7 +1169,7 @@ function openRabbitModal(rabbitId) {
                     </div>
                 ` : ''}
                 ${signatureSnack ? `
-                    <div class="signature-item-card" onclick="addSnackToCart('${signatureSnack.id}')">
+                    <div class="signature-item-card" onclick="addSnackToCart('${signatureSnack.id}', true)">
                         <div class="signature-item-visual">
                             <span class="signature-snack-icon">${signatureSnack.icon}</span>
                         </div>
@@ -1108,7 +1398,8 @@ function updateSignatureUpsell(rabbitId) {
 
 // Add signature drink to cart from schedule modal
 function addSignatureDrinkFromSchedule(drinkId) {
-    addToCart(drinkId);
+    // Suppress upsell since user is already booking with this bun
+    addToCart(drinkId, true);
     // Mark the button as added
     const btn = event.target;
     btn.textContent = '✓ Added';
@@ -1118,7 +1409,8 @@ function addSignatureDrinkFromSchedule(drinkId) {
 
 // Add signature snack to cart from schedule modal
 function addSignatureSnackFromSchedule(snackId) {
-    addSnackToCart(snackId);
+    // Suppress upsell since user is already booking with this bun
+    addSnackToCart(snackId, true);
     // Mark the button as added
     const btn = event.target;
     btn.textContent = '✓ Added';
@@ -1156,7 +1448,16 @@ function handleScheduleVisit() {
 
     // Add stamps for booking
     state.stamps += 2;
+    state.totalStampsEarned += 2;
     state.rabbitVisits++;
+
+    // Track unique buns visited for achievements
+    if (!state.uniqueBunsVisited.includes(rabbitId)) {
+        state.uniqueBunsVisited.push(rabbitId);
+    }
+
+    // Track total spent for achievements
+    state.totalSpent += totalCost;
 
     // Add friendship points
     let totalFriendshipPoints = baseFriendshipPoints;
@@ -1165,6 +1466,7 @@ function handleScheduleVisit() {
         if (treat) {
             totalFriendshipPoints += treat.friendshipPoints;
             addFriendshipPoints(rabbitId, treat.friendshipPoints, 'treat');
+            state.treatsGivenTotal++;
         }
     });
 
@@ -1172,6 +1474,7 @@ function handleScheduleVisit() {
         if (toy) {
             totalFriendshipPoints += toy.friendshipPoints;
             addFriendshipPoints(rabbitId, toy.friendshipPoints, 'toy');
+            state.toysPlayedTotal++;
         }
     });
 
@@ -1181,7 +1484,29 @@ function handleScheduleVisit() {
     // Add spending for leaderboard
     addRabbitSpending(rabbitId, totalCost);
 
+    // Save visit to history
+    const visit = {
+        id: Date.now(),
+        date: new Date().toISOString(),
+        rabbitId: rabbitId,
+        rabbitName: rabbit.name,
+        duration: duration,
+        treats: selectedTreats.map(t => t?.name).filter(Boolean),
+        toys: selectedToys.map(t => t?.name).filter(Boolean),
+        cost: totalCost,
+        friendshipPointsEarned: totalFriendshipPoints
+    };
+    state.visitHistory.unshift(visit);
+
+    // Keep only last 50 visits
+    if (state.visitHistory.length > 50) {
+        state.visitHistory = state.visitHistory.slice(0, 50);
+    }
+
     checkRewardUnlocks();
+
+    // Check for achievements
+    checkAchievements();
     saveState();
     updateStats();
     renderPassport();
@@ -1204,6 +1529,250 @@ function handleScheduleVisit() {
 function initPassport() {
     renderPassport();
     renderDashboard();
+    initProfile();
+    initHistory();
+}
+
+// ============================================
+// USER PROFILE
+// ============================================
+function initProfile() {
+    const editBtn = document.getElementById('profileEditBtn');
+    const modal = document.getElementById('profileModal');
+    const closeBtn = document.getElementById('profileModalClose');
+    const saveBtn = document.getElementById('profileSaveBtn');
+    const nameInput = document.getElementById('profileNameInput');
+    const avatarPicker = document.getElementById('avatarPicker');
+
+    if (!editBtn || !modal) return;
+
+    // Open profile modal
+    editBtn.addEventListener('click', () => {
+        nameInput.value = state.userName || '';
+        updateAvatarSelection(state.userAvatar || '🐰');
+        modal.classList.add('open');
+        lockScroll();
+    });
+
+    // Close modal
+    closeBtn.addEventListener('click', () => {
+        modal.classList.remove('open');
+        unlockScroll();
+    });
+
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.classList.remove('open');
+            unlockScroll();
+        }
+    });
+
+    // Avatar selection
+    avatarPicker.addEventListener('click', (e) => {
+        const option = e.target.closest('.avatar-option');
+        if (option) {
+            updateAvatarSelection(option.dataset.avatar);
+        }
+    });
+
+    // Save profile
+    saveBtn.addEventListener('click', () => {
+        const selectedAvatar = avatarPicker.querySelector('.avatar-option.selected');
+        state.userName = nameInput.value.trim() || '';
+        state.userAvatar = selectedAvatar ? selectedAvatar.dataset.avatar : '🐰';
+
+        // Set member since date if first time setting name
+        if (state.userName && !state.memberSince) {
+            state.memberSince = new Date().toISOString();
+        }
+
+        saveState();
+        renderProfile();
+        modal.classList.remove('open');
+        unlockScroll();
+        showToast('Profile updated!', state.userAvatar);
+    });
+
+    renderProfile();
+}
+
+function updateAvatarSelection(avatar) {
+    const avatarPicker = document.getElementById('avatarPicker');
+    avatarPicker.querySelectorAll('.avatar-option').forEach(opt => {
+        opt.classList.toggle('selected', opt.dataset.avatar === avatar);
+    });
+}
+
+function renderProfile() {
+    const profileName = document.getElementById('profileName');
+    const profileAvatar = document.getElementById('profileAvatar');
+    const profileDrinks = document.getElementById('profileDrinks');
+    const profileVisits = document.getElementById('profileVisits');
+    const profileStamps = document.getElementById('profileStamps');
+    const profileMemberSince = document.getElementById('profileMemberSince');
+    const passportOwner = document.getElementById('passportOwner');
+
+    const displayName = state.userName || 'Guest';
+
+    if (profileName) profileName.textContent = displayName;
+    if (profileAvatar) profileAvatar.textContent = state.userAvatar || '🐰';
+    if (profileDrinks) profileDrinks.textContent = state.drinksOrdered;
+    if (profileVisits) profileVisits.textContent = state.rabbitVisits;
+    if (profileStamps) profileStamps.textContent = state.stamps;
+    if (passportOwner) passportOwner.textContent = displayName;
+
+    if (profileMemberSince) {
+        if (state.memberSince) {
+            const date = new Date(state.memberSince);
+            const options = { month: 'short', year: 'numeric' };
+            profileMemberSince.textContent = `Member since ${date.toLocaleDateString('en-US', options)}`;
+        } else if (state.hasVisited) {
+            profileMemberSince.textContent = 'Regular visitor';
+        } else {
+            profileMemberSince.textContent = 'New member';
+        }
+    }
+}
+
+// ============================================
+// ORDER & VISIT HISTORY
+// ============================================
+let currentHistoryTab = 'orders';
+
+function initHistory() {
+    const tabs = document.querySelectorAll('.history-tab');
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            tabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            currentHistoryTab = tab.dataset.history;
+            renderHistory();
+        });
+    });
+
+    renderHistory();
+}
+
+function renderHistory() {
+    const container = document.getElementById('historyContent');
+    if (!container) return;
+
+    if (currentHistoryTab === 'orders') {
+        renderOrderHistory(container);
+    } else {
+        renderVisitHistory(container);
+    }
+}
+
+function renderOrderHistory(container) {
+    if (state.orderHistory.length === 0) {
+        container.innerHTML = `
+            <div class="history-empty">
+                <span class="history-empty-icon">🧋</span>
+                <p>No orders yet!</p>
+                <button class="btn btn-small btn-primary" data-navigate="menu">Order Your First Drink</button>
+            </div>
+        `;
+        attachNavigationHandler(container);
+        return;
+    }
+
+    container.innerHTML = state.orderHistory.slice(0, 10).map(order => {
+        const date = new Date(order.date);
+        const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        const timeStr = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+
+        // Handle shop redemptions vs regular orders
+        if (order.type === 'shop') {
+            return `
+                <div class="history-item history-shop">
+                    <div class="history-icon">${order.itemIcon}</div>
+                    <div class="history-info">
+                        <div class="history-title">Shop Redemption</div>
+                        <div class="history-details">${order.itemName}</div>
+                        <div class="history-meta">
+                            <span class="history-date">${dateStr} at ${timeStr}</span>
+                            <span class="history-stamps spent">-${order.stampsCost} stamps</span>
+                        </div>
+                    </div>
+                    <div class="history-price redeemed">🎁</div>
+                </div>
+            `;
+        }
+
+        // Regular drink/snack order
+        const itemCount = order.items.reduce((sum, item) => sum + item.quantity, 0);
+        const itemNames = order.items.map(i => i.quantity > 1 ? `${i.name} x${i.quantity}` : i.name).join(', ');
+
+        return `
+            <div class="history-item">
+                <div class="history-icon">🧋</div>
+                <div class="history-info">
+                    <div class="history-title">${itemCount} item${itemCount !== 1 ? 's' : ''}</div>
+                    <div class="history-details">${itemNames}</div>
+                    <div class="history-meta">
+                        <span class="history-date">${dateStr} at ${timeStr}</span>
+                        ${order.stampsEarned > 0 ? `<span class="history-stamps">+${order.stampsEarned} stamps</span>` : ''}
+                    </div>
+                </div>
+                <div class="history-price">$${order.total.toFixed(2)}</div>
+            </div>
+        `;
+    }).join('');
+
+    if (state.orderHistory.length > 10) {
+        container.innerHTML += `<p class="history-more">Showing last 10 of ${state.orderHistory.length} orders</p>`;
+    }
+}
+
+function renderVisitHistory(container) {
+    if (state.visitHistory.length === 0) {
+        container.innerHTML = `
+            <div class="history-empty">
+                <span class="history-empty-icon">🐰</span>
+                <p>No visits yet!</p>
+                <button class="btn btn-small btn-primary" data-navigate="rabbits">Meet the Buns</button>
+            </div>
+        `;
+        attachNavigationHandler(container);
+        return;
+    }
+
+    container.innerHTML = state.visitHistory.slice(0, 10).map(visit => {
+        const date = new Date(visit.date);
+        const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        const extras = [...visit.treats, ...visit.toys];
+        const extrasStr = extras.length > 0 ? extras.join(', ') : 'No extras';
+
+        return `
+            <div class="history-item" onclick="openRabbitModal('${visit.rabbitId}')" style="cursor: pointer;">
+                <div class="history-item-icon">🐰</div>
+                <div class="history-item-info">
+                    <div class="history-item-title">${visit.rabbitName}</div>
+                    <div class="history-item-details">${visit.duration} min • ${extrasStr}</div>
+                    <div class="history-item-meta">
+                        <span>${dateStr}</span>
+                        <span class="history-points">+${visit.friendshipPointsEarned} friendship</span>
+                    </div>
+                </div>
+                <div class="history-item-price">$${visit.cost.toFixed(2)}</div>
+            </div>
+        `;
+    }).join('');
+
+    if (state.visitHistory.length > 10) {
+        container.innerHTML += `<p class="history-more">Showing last 10 of ${state.visitHistory.length} visits</p>`;
+    }
+}
+
+function attachNavigationHandler(container) {
+    const navBtn = container.querySelector('[data-navigate]');
+    if (navBtn) {
+        navBtn.addEventListener('click', () => {
+            document.querySelector(`[data-page="${navBtn.dataset.navigate}"]`).click();
+        });
+    }
 }
 
 function renderPassport() {
@@ -1243,6 +1812,12 @@ function renderPassport() {
             </div>
         `;
     }).join('');
+
+    // Also update achievements display
+    renderAchievements();
+
+    // Also update profile display
+    renderProfile();
 }
 
 // ============================================
@@ -1360,24 +1935,240 @@ function checkRewardUnlocks() {
 }
 
 // ============================================
-// SHOP
+// ACHIEVEMENTS / STICKERS
 // ============================================
-function initShop() {
-    const shopGrid = document.getElementById('shopGrid');
+let currentAchievementCategory = 'all';
 
-    shopGrid.innerHTML = SHOP_ITEMS.map(item => {
-        const unlocked = state.stamps >= item.stampsRequired;
+function initAchievements() {
+    const tabButtons = document.querySelectorAll('.achievement-tab');
+
+    tabButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            tabButtons.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentAchievementCategory = btn.dataset.category;
+            renderAchievements();
+        });
+    });
+
+    renderAchievements();
+}
+
+function renderAchievements() {
+    const achievementGrid = document.getElementById('achievementGrid');
+    const achievementCount = document.getElementById('achievementCount');
+    const achievementTotal = document.getElementById('achievementTotal');
+    const achievementStamps = document.getElementById('achievementStamps');
+
+    if (!achievementGrid) return;
+
+    // Update stats
+    const unlockedCount = state.unlockedAchievements.length;
+    const totalCount = ACHIEVEMENTS.length;
+    const stampsFromAchievements = state.unlockedAchievements.reduce((sum, id) => {
+        const achievement = ACHIEVEMENTS.find(a => a.id === id);
+        return sum + (achievement?.reward?.stamps || 0);
+    }, 0);
+
+    achievementCount.textContent = unlockedCount;
+    achievementTotal.textContent = `/ ${totalCount}`;
+    achievementStamps.textContent = stampsFromAchievements;
+
+    // Filter achievements by category
+    let filteredAchievements = ACHIEVEMENTS;
+    if (currentAchievementCategory !== 'all') {
+        filteredAchievements = ACHIEVEMENTS.filter(a => a.category === currentAchievementCategory);
+    }
+
+    // Render achievement cards
+    achievementGrid.innerHTML = filteredAchievements.map(achievement => {
+        const isUnlocked = state.unlockedAchievements.includes(achievement.id);
+        const category = ACHIEVEMENT_CATEGORIES[achievement.category];
+        const progress = getAchievementProgress(achievement);
+        const progressPercent = Math.min((progress.current / progress.total) * 100, 100);
+
         return `
-            <div class="shop-item ${unlocked ? '' : 'locked'}">
-                <div class="shop-item-image">${item.icon}</div>
-                <div class="shop-item-info">
-                    <h3 class="shop-item-name">${item.name}</h3>
-                    <p class="shop-item-req">${unlocked ? '✓ Unlocked' : `🔒 ${item.stampsRequired} stamps to unlock`}</p>
-                    <p class="shop-item-price">$${item.price.toFixed(2)}</p>
+            <div class="achievement-card ${isUnlocked ? 'unlocked' : 'locked'}">
+                <div class="achievement-sticker" style="${isUnlocked ? '' : 'filter: grayscale(100%); opacity: 0.5;'}">
+                    ${achievement.sticker}
+                </div>
+                <div class="achievement-info">
+                    <div class="achievement-name">${achievement.name}</div>
+                    <div class="achievement-desc">${achievement.description}</div>
+                    ${!isUnlocked ? `
+                        <div class="achievement-progress">
+                            <div class="achievement-progress-bar">
+                                <div class="achievement-progress-fill" style="width: ${progressPercent}%"></div>
+                            </div>
+                            <span class="achievement-progress-text">${progress.current}/${progress.total}</span>
+                        </div>
+                    ` : `
+                        <div class="achievement-reward">
+                            <span class="achievement-reward-icon">⭐</span>
+                            <span class="achievement-reward-text">+${achievement.reward.stamps} stamps</span>
+                        </div>
+                    `}
+                </div>
+                <div class="achievement-category-badge" style="background: ${category.color}20; color: ${category.color}">
+                    ${category.icon}
                 </div>
             </div>
         `;
     }).join('');
+}
+
+// ============================================
+// SHOP
+// ============================================
+let currentShopItem = null;
+
+function initShop() {
+    renderShop();
+
+    // Set up modal event listeners
+    const shopModal = document.getElementById('shopModal');
+    const shopModalClose = document.getElementById('shopModalClose');
+    const shopCancelBtn = document.getElementById('shopCancelBtn');
+    const shopConfirmBtn = document.getElementById('shopConfirmBtn');
+
+    shopModalClose.addEventListener('click', closeShopModal);
+    shopCancelBtn.addEventListener('click', closeShopModal);
+    shopConfirmBtn.addEventListener('click', confirmShopPurchase);
+
+    // Close on overlay click
+    shopModal.addEventListener('click', (e) => {
+        if (e.target === shopModal) {
+            closeShopModal();
+        }
+    });
+}
+
+function renderShop() {
+    const shopGrid = document.getElementById('shopGrid');
+    if (!shopGrid) return;
+
+    shopGrid.innerHTML = SHOP_ITEMS.map(item => {
+        const owned = state.purchasedItems.includes(item.id);
+        const canAfford = state.stamps >= item.stampsRequired;
+
+        let statusText = '';
+        let statusClass = '';
+
+        if (owned) {
+            statusText = '✓ Owned';
+            statusClass = 'owned';
+        } else if (canAfford) {
+            statusText = `⭐ ${item.stampsRequired} stamps`;
+            statusClass = 'available';
+        } else {
+            statusText = `🔒 ${item.stampsRequired} stamps`;
+            statusClass = 'locked';
+        }
+
+        return `
+            <div class="shop-item ${statusClass}"
+                 onclick="openShopModal('${item.id}')"
+                 data-item-id="${item.id}">
+                <div class="shop-item-image">${item.icon}</div>
+                <div class="shop-item-info">
+                    <h3 class="shop-item-name">${item.name}</h3>
+                    <p class="shop-item-desc">${item.description}</p>
+                    <p class="shop-item-cost ${statusClass}">${statusText}</p>
+                </div>
+                ${owned ? '<div class="shop-item-owned-badge">Owned</div>' : ''}
+            </div>
+        `;
+    }).join('');
+}
+
+function openShopModal(itemId) {
+    const item = SHOP_ITEMS.find(i => i.id === itemId);
+    if (!item) return;
+
+    currentShopItem = item;
+    const owned = state.purchasedItems.includes(item.id);
+    const canAfford = state.stamps >= item.stampsRequired;
+
+    // Update modal content
+    document.getElementById('shopModalIcon').textContent = item.icon;
+    document.getElementById('shopModalName').textContent = item.name;
+    document.getElementById('shopModalDesc').textContent = item.description;
+    document.getElementById('shopModalStamps').textContent = item.stampsRequired;
+    document.getElementById('shopModalBalance').textContent = state.stamps;
+
+    const confirmBtn = document.getElementById('shopConfirmBtn');
+    const noteEl = document.getElementById('shopModalNote');
+
+    if (owned) {
+        confirmBtn.disabled = true;
+        confirmBtn.textContent = 'Already Owned';
+        noteEl.textContent = 'You already have this item in your collection!';
+        noteEl.className = 'shop-modal-note owned';
+    } else if (canAfford) {
+        confirmBtn.disabled = false;
+        confirmBtn.textContent = 'Redeem';
+        noteEl.textContent = 'This will deduct stamps from your balance.';
+        noteEl.className = 'shop-modal-note';
+    } else {
+        confirmBtn.disabled = true;
+        confirmBtn.textContent = 'Not Enough Stamps';
+        const needed = item.stampsRequired - state.stamps;
+        noteEl.textContent = `You need ${needed} more stamp${needed > 1 ? 's' : ''} to redeem this item.`;
+        noteEl.className = 'shop-modal-note locked';
+    }
+
+    document.getElementById('shopModal').classList.add('active');
+}
+
+function closeShopModal() {
+    document.getElementById('shopModal').classList.remove('active');
+    currentShopItem = null;
+}
+
+function confirmShopPurchase() {
+    if (!currentShopItem) return;
+
+    const item = currentShopItem;
+    const owned = state.purchasedItems.includes(item.id);
+    const canAfford = state.stamps >= item.stampsRequired;
+
+    if (owned || !canAfford) return;
+
+    // Deduct stamps and add to purchased items
+    state.stamps -= item.stampsRequired;
+    state.purchasedItems.push(item.id);
+
+    // Add to order history
+    const purchase = {
+        id: Date.now(),
+        type: 'shop',
+        date: new Date().toISOString(),
+        itemId: item.id,
+        itemName: item.name,
+        itemIcon: item.icon,
+        stampsCost: item.stampsRequired
+    };
+    state.orderHistory.unshift(purchase);
+
+    // Keep history manageable
+    if (state.orderHistory.length > 50) {
+        state.orderHistory = state.orderHistory.slice(0, 50);
+    }
+
+    saveState();
+
+    // Close modal and show success
+    closeShopModal();
+    showToast(`${item.name} redeemed!`, item.icon);
+
+    // Check achievements
+    checkAchievements();
+
+    // Re-render shop to update owned status
+    renderShop();
+
+    // Update stamp display in passport
+    renderPassport();
 }
 
 // ============================================
@@ -1753,6 +2544,278 @@ function updateStats() {
     document.getElementById('statDrinks').textContent = state.drinksOrdered;
     document.getElementById('statVisits').textContent = state.rabbitVisits;
     document.getElementById('statStamps').textContent = state.stamps;
+
+    // Also update home page sections
+    renderHomePage();
+}
+
+// ============================================
+// HOME PAGE
+// ============================================
+function initHomePage() {
+    renderHomePage();
+
+    // Add click handler for best friend card
+    const bestFriendCard = document.getElementById('bestFriendCard');
+    if (bestFriendCard) {
+        bestFriendCard.addEventListener('click', () => {
+            const bestFriend = getBestFriend();
+            if (bestFriend) {
+                openRabbitModal(bestFriend.id);
+            }
+        });
+    }
+}
+
+function getBestFriend() {
+    let bestFriend = null;
+    let bestPoints = 0;
+    RABBITS.forEach(rabbit => {
+        const points = state.friendships[rabbit.id]?.points || 0;
+        if (points > bestPoints) {
+            bestPoints = points;
+            bestFriend = rabbit;
+        }
+    });
+    return bestFriend;
+}
+
+function renderHomePage() {
+    const isNewUser = state.drinksOrdered === 0 && state.rabbitVisits === 0;
+    const hasActivity = state.drinksOrdered > 0 || state.rabbitVisits > 0 || state.stamps > 0;
+
+    // Show/hide sections based on user state
+    const welcomeSection = document.getElementById('homeWelcome');
+    const progressSection = document.getElementById('homeProgress');
+    const howItWorksSection = document.getElementById('homeHowItWorks');
+    const featuredSection = document.getElementById('homeFeatured');
+    const trendingSection = document.getElementById('homeTrending');
+
+    if (welcomeSection) {
+        welcomeSection.style.display = hasActivity ? 'flex' : 'none';
+    }
+    if (progressSection) {
+        progressSection.style.display = hasActivity ? 'block' : 'none';
+    }
+    if (howItWorksSection) {
+        howItWorksSection.style.display = isNewUser ? 'block' : 'none';
+    }
+
+    // Always show featured and trending
+    if (featuredSection) {
+        renderFeaturedBun();
+    }
+    if (trendingSection) {
+        renderTrending();
+    }
+
+    // Render personalized sections for returning users
+    if (hasActivity) {
+        renderWelcome();
+        renderProgress();
+    }
+}
+
+function renderWelcome() {
+    const greeting = document.getElementById('welcomeGreeting');
+    const message = document.getElementById('welcomeMessage');
+    const actions = document.getElementById('welcomeActions');
+
+    if (!greeting || !message || !actions) return;
+
+    // Time-based greeting
+    const hour = new Date().getHours();
+    let timeGreeting = 'Welcome back';
+    if (hour < 12) timeGreeting = 'Good morning';
+    else if (hour < 17) timeGreeting = 'Good afternoon';
+    else timeGreeting = 'Good evening';
+
+    // Find best friend for personalization
+    const bestFriend = getBestFriend();
+    const userName = state.userName || 'friend';
+
+    greeting.textContent = `${timeGreeting}!`;
+
+    // Personalized message based on activity
+    const messages = [];
+    if (bestFriend && state.friendships[bestFriend.id]?.points >= 50) {
+        messages.push(`${bestFriend.name} has been asking about you!`);
+    }
+    if (state.stamps >= 8 && state.stamps < 10) {
+        messages.push(`Just ${10 - state.stamps} more stamps until your next reward!`);
+    }
+    if (state.rabbitVisits === 0 && state.drinksOrdered > 0) {
+        messages.push("You haven't met our buns yet - they're waiting for you!");
+    }
+    if (!state.checkedInToday) {
+        messages.push("Don't forget your daily check-in for a free stamp!");
+    }
+
+    message.textContent = messages.length > 0 ? messages[0] : "Ready for another adventure?";
+
+    // Dynamic CTAs
+    let actionsHtml = '';
+    if (!state.checkedInToday) {
+        actionsHtml += `<button class="btn btn-small btn-secondary" onclick="document.getElementById('checkinBtn').click()">Daily Check-in</button>`;
+    }
+    if (bestFriend) {
+        actionsHtml += `<button class="btn btn-small btn-secondary" onclick="openRabbitModal('${bestFriend.id}')">Visit ${bestFriend.name}</button>`;
+    }
+    actionsHtml += `<button class="btn btn-small btn-primary" data-navigate="menu">Order Drinks</button>`;
+
+    actions.innerHTML = actionsHtml;
+
+    // Re-attach navigation handlers
+    actions.querySelectorAll('[data-navigate]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelector(`[data-page="${btn.dataset.navigate}"]`).click();
+        });
+    });
+}
+
+function renderProgress() {
+    // Next Reward
+    const nextReward = REWARDS.find(r => state.stamps < r.stampsRequired);
+    const nextRewardName = document.getElementById('nextRewardName');
+    const nextRewardProgress = document.getElementById('nextRewardProgress');
+    const nextRewardText = document.getElementById('nextRewardText');
+
+    if (nextRewardName && nextReward) {
+        nextRewardName.textContent = nextReward.name;
+        const progress = (state.stamps / nextReward.stampsRequired) * 100;
+        nextRewardProgress.style.width = `${Math.min(progress, 100)}%`;
+        nextRewardText.textContent = `${state.stamps} / ${nextReward.stampsRequired} stamps`;
+    } else if (nextRewardName) {
+        nextRewardName.textContent = 'All unlocked!';
+        nextRewardProgress.style.width = '100%';
+        nextRewardText.textContent = 'You have all rewards!';
+    }
+
+    // Best Friend Progress
+    const bestFriend = getBestFriend();
+    const bestFriendInfo = document.getElementById('bestFriendInfo');
+    const bestFriendProgress = document.getElementById('bestFriendProgress');
+    const bestFriendText = document.getElementById('bestFriendText');
+
+    if (bestFriendInfo && bestFriend) {
+        const friendship = state.friendships[bestFriend.id];
+        const level = getFriendshipLevelForRabbit(bestFriend.id);
+        const nextLevel = FRIENDSHIP_LEVELS.find(l => l.minPoints > friendship.points);
+
+        bestFriendInfo.innerHTML = `
+            <span class="progress-bun-emoji">${level.icon}</span>
+            <span class="progress-bun-name">${bestFriend.name}</span>
+            <span class="progress-bun-level">${level.name}</span>
+        `;
+
+        if (nextLevel) {
+            const progress = ((friendship.points - level.minPoints) / (nextLevel.minPoints - level.minPoints)) * 100;
+            bestFriendProgress.style.width = `${Math.min(progress, 100)}%`;
+            bestFriendText.textContent = `${nextLevel.minPoints - friendship.points} pts to ${nextLevel.name}`;
+        } else {
+            bestFriendProgress.style.width = '100%';
+            bestFriendText.textContent = 'Max friendship reached!';
+        }
+    }
+
+    // Achievements Progress
+    const achievementCount = document.getElementById('achievementProgressCount');
+    const achievementProgress = document.getElementById('achievementProgress');
+    const nextAchievementText = document.getElementById('nextAchievementText');
+
+    if (achievementCount) {
+        const unlocked = state.unlockedAchievements.length;
+        const total = ACHIEVEMENTS.length;
+        achievementCount.textContent = `${unlocked} / ${total}`;
+        achievementProgress.style.width = `${(unlocked / total) * 100}%`;
+
+        // Find next closest achievement
+        const nextAchievement = ACHIEVEMENTS.find(a =>
+            !state.unlockedAchievements.includes(a.id)
+        );
+        if (nextAchievement) {
+            nextAchievementText.textContent = `Next: ${nextAchievement.name}`;
+        } else {
+            nextAchievementText.textContent = 'All stickers collected!';
+        }
+    }
+}
+
+function renderFeaturedBun() {
+    const container = document.getElementById('featuredBunCard');
+    if (!container) return;
+
+    // Pick "featured" bun based on day of year for consistency
+    const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
+    const featuredIndex = dayOfYear % RABBITS.length;
+    const rabbit = RABBITS[featuredIndex];
+
+    const rarityConfig = getRarityConfig(rabbit.rarity);
+    const friendshipLevel = getFriendshipLevelForRabbit(rabbit.id);
+    const signatureDrink = getSignatureDrinkForRabbit(rabbit.id);
+
+    container.innerHTML = `
+        <div class="featured-bun-inner" onclick="openRabbitModal('${rabbit.id}')">
+            <div class="featured-bun-image">
+                <img src="${rabbit.image}" alt="${rabbit.name}" class="featured-bun-photo">
+                <span class="featured-bun-rarity" style="background: ${rarityConfig.bgColor}; color: ${rarityConfig.color}">
+                    ${rarityConfig.label}
+                </span>
+            </div>
+            <div class="featured-bun-info">
+                <div class="featured-bun-header">
+                    <h4 class="featured-bun-name">${rabbit.name}</h4>
+                    <span class="featured-bun-friendship">${friendshipLevel.icon}</span>
+                </div>
+                <p class="featured-bun-breed">${rabbit.breed}</p>
+                <p class="featured-bun-personality">"${rabbit.personality}"</p>
+                ${signatureDrink ? `
+                    <div class="featured-bun-signature">
+                        <span class="signature-label">Signature drink:</span>
+                        <span class="signature-name">${signatureDrink.name}</span>
+                    </div>
+                ` : ''}
+                <button class="btn btn-small btn-primary">Book Time with ${rabbit.name}</button>
+            </div>
+        </div>
+    `;
+}
+
+function renderTrending() {
+    const container = document.getElementById('trendingGrid');
+    if (!container) return;
+
+    // Get top 3 from leaderboard
+    const rankings = getCommunityLeaderboard('week');
+    const topBuns = rankings.slice(0, 3);
+
+    // Get a popular drink (most ordered signature drink)
+    const popularDrink = SIGNATURE_DRINKS[Math.floor(Date.now() / 86400000) % SIGNATURE_DRINKS.length];
+
+    container.innerHTML = `
+        <div class="trending-item trending-buns">
+            <div class="trending-label">Hot Buns This Week</div>
+            <div class="trending-buns-list">
+                ${topBuns.map((rabbit, index) => `
+                    <div class="trending-bun" onclick="openRabbitModal('${rabbit.id}')">
+                        <span class="trending-rank">#${index + 1}</span>
+                        <img src="${rabbit.image}" alt="${rabbit.name}" class="trending-bun-img">
+                        <span class="trending-bun-name">${rabbit.name}</span>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+        <div class="trending-item trending-drink" onclick="openDrinkModal('${popularDrink.id}')">
+            <div class="trending-label">Popular Drink</div>
+            <div class="trending-drink-content">
+                <div class="trending-drink-cup" style="background: ${popularDrink.gradient}"></div>
+                <div class="trending-drink-info">
+                    <span class="trending-drink-name">${popularDrink.name}</span>
+                    <span class="trending-drink-price">$${popularDrink.price.toFixed(2)}</span>
+                </div>
+            </div>
+        </div>
+    `;
 }
 
 // ============================================
@@ -1777,12 +2840,88 @@ function showToast(message, icon = '🐰') {
     }, 3000);
 }
 
+// Enhanced upsell toast for signature items
+function showUpsellToast(itemName, rabbit, type = 'drink') {
+    const container = document.getElementById('toastContainer');
+
+    // Remove any existing upsell toasts first
+    container.querySelectorAll('.toast-upsell').forEach(t => t.remove());
+
+    const toast = document.createElement('div');
+    toast.className = 'toast toast-upsell';
+
+    const typeIcon = type === 'drink' ? '🧋' : '🍡';
+    const friendshipLevel = getFriendshipLevelForRabbit(rabbit.id);
+
+    toast.innerHTML = `
+        <div class="upsell-header">
+            <span class="toast-icon">${typeIcon}</span>
+            <span class="toast-message">Added to cart!</span>
+        </div>
+        <div class="upsell-content">
+            <img src="${rabbit.image}" alt="${rabbit.name}" class="upsell-bun-img">
+            <div class="upsell-info">
+                <span class="upsell-label">${rabbit.name}'s Signature ${type === 'drink' ? 'Drink' : 'Snack'}!</span>
+                <span class="upsell-friendship">${friendshipLevel.icon} ${friendshipLevel.name}</span>
+            </div>
+        </div>
+        <div class="upsell-actions">
+            <button class="upsell-btn upsell-btn-primary" onclick="bookFromUpsell('${rabbit.id}')">
+                Book Time with ${rabbit.name}
+            </button>
+            <button class="upsell-btn upsell-btn-dismiss" onclick="dismissUpsell(this)">
+                Maybe Later
+            </button>
+        </div>
+    `;
+
+    container.appendChild(toast);
+
+    // Auto-dismiss after 8 seconds if not interacted with
+    setTimeout(() => {
+        if (toast.parentNode) {
+            toast.classList.add('toast-out');
+            setTimeout(() => toast.remove(), 300);
+        }
+    }, 8000);
+}
+
+// Book time from upsell toast
+function bookFromUpsell(rabbitId) {
+    // Remove upsell toast
+    document.querySelectorAll('.toast-upsell').forEach(t => {
+        t.classList.add('toast-out');
+        setTimeout(() => t.remove(), 300);
+    });
+
+    // Open schedule modal with this rabbit
+    openScheduleModal(rabbitId);
+}
+
+// Dismiss upsell toast
+function dismissUpsell(btn) {
+    const toast = btn.closest('.toast-upsell');
+    if (toast) {
+        toast.classList.add('toast-out');
+        setTimeout(() => toast.remove(), 300);
+    }
+}
+
 // ============================================
 // INITIALIZE APP
 // ============================================
 document.addEventListener('DOMContentLoaded', () => {
     loadState();
     initFriendships();
+
+    // Mark first visit for achievement
+    if (!state.hasVisited) {
+        state.hasVisited = true;
+        saveState();
+        // Check for first visit achievement after a brief delay
+        setTimeout(() => checkAchievements(), 1000);
+    }
+
     initBobaParticles();
     initNavigation();
     initMenu();
@@ -1790,9 +2929,11 @@ document.addEventListener('DOMContentLoaded', () => {
     initRabbits();
     initScheduling();
     initPassport();
+    initAchievements();
     initShop();
     initLeaderboard();
     initDailyCheckin();
+    initHomePage();
     updateStats();
 
     // Add cart bounce animation

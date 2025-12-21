@@ -999,6 +999,314 @@ const VISIT_PRICING = {
 };
 
 // ============================================
+// ACHIEVEMENTS / STICKERS
+// ============================================
+
+const ACHIEVEMENT_CATEGORIES = {
+    welcome: { name: 'Welcome', icon: '🌸', color: '#FFB7C5' },
+    friendship: { name: 'Friendship', icon: '💕', color: '#FF69B4' },
+    collector: { name: 'Collector', icon: '🧋', color: '#D4A574' },
+    explorer: { name: 'Explorer', icon: '🗺️', color: '#87CEEB' },
+    loyalty: { name: 'Loyalty', icon: '⭐', color: '#FFD700' },
+    special: { name: 'Special', icon: '✨', color: '#E6E6FA' }
+};
+
+const ACHIEVEMENTS = [
+    // Welcome achievements
+    {
+        id: 'first_visit',
+        name: 'Welcome to the Warren!',
+        description: 'Visit the café for the first time',
+        sticker: '🏠',
+        category: 'welcome',
+        condition: { type: 'first_visit' },
+        reward: { stamps: 3 }
+    },
+    {
+        id: 'first_drink',
+        name: 'First Sip',
+        description: 'Order your first drink',
+        sticker: '🧋',
+        category: 'welcome',
+        condition: { type: 'drinks_ordered', count: 1 },
+        reward: { stamps: 2 }
+    },
+    {
+        id: 'first_bun_time',
+        name: 'Bun Buddy',
+        description: 'Book your first session with a bun',
+        sticker: '🐰',
+        category: 'welcome',
+        condition: { type: 'sessions_booked', count: 1 },
+        reward: { stamps: 3 }
+    },
+    {
+        id: 'first_snack',
+        name: 'Treat Time',
+        description: 'Order your first snack',
+        sticker: '🍡',
+        category: 'welcome',
+        condition: { type: 'snacks_ordered', count: 1 },
+        reward: { stamps: 2 }
+    },
+
+    // Collector achievements - Drinks
+    {
+        id: 'drink_enthusiast',
+        name: 'Drink Enthusiast',
+        description: 'Order 5 drinks',
+        sticker: '🍵',
+        category: 'collector',
+        condition: { type: 'drinks_ordered', count: 5 },
+        reward: { stamps: 5 }
+    },
+    {
+        id: 'drink_connoisseur',
+        name: 'Drink Connoisseur',
+        description: 'Order 15 drinks',
+        sticker: '☕',
+        category: 'collector',
+        condition: { type: 'drinks_ordered', count: 15 },
+        reward: { stamps: 10 }
+    },
+    {
+        id: 'drink_master',
+        name: 'Master of Tea',
+        description: 'Order 50 drinks',
+        sticker: '🏆',
+        category: 'collector',
+        condition: { type: 'drinks_ordered', count: 50 },
+        reward: { stamps: 25 }
+    },
+
+    // Collector achievements - Snacks
+    {
+        id: 'snack_lover',
+        name: 'Snack Lover',
+        description: 'Order 5 snacks',
+        sticker: '🍪',
+        category: 'collector',
+        condition: { type: 'snacks_ordered', count: 5 },
+        reward: { stamps: 5 }
+    },
+    {
+        id: 'snack_aficionado',
+        name: 'Snack Aficionado',
+        description: 'Order 15 snacks',
+        sticker: '🥮',
+        category: 'collector',
+        condition: { type: 'snacks_ordered', count: 15 },
+        reward: { stamps: 10 }
+    },
+
+    // Friendship achievements
+    {
+        id: 'made_a_friend',
+        name: 'Made a Friend',
+        description: 'Reach "Friend" status with any bun',
+        sticker: '🤝',
+        category: 'friendship',
+        condition: { type: 'friendship_level', level: 'Friend' },
+        reward: { stamps: 5 }
+    },
+    {
+        id: 'best_friends',
+        name: 'Best Friends Forever',
+        description: 'Reach "Best Friend" status with any bun',
+        sticker: '💖',
+        category: 'friendship',
+        condition: { type: 'friendship_level', level: 'Best Friend' },
+        reward: { stamps: 15 }
+    },
+    {
+        id: 'soulmate',
+        name: 'Soulmate Bond',
+        description: 'Reach "Soulmate" status with any bun',
+        sticker: '💫',
+        category: 'friendship',
+        condition: { type: 'friendship_level', level: 'Soulmate' },
+        reward: { stamps: 30 }
+    },
+    {
+        id: 'social_butterfly',
+        name: 'Social Butterfly',
+        description: 'Reach "Friend" status with 5 different buns',
+        sticker: '🦋',
+        category: 'friendship',
+        condition: { type: 'friends_count', count: 5, level: 'Friend' },
+        reward: { stamps: 20 }
+    },
+    {
+        id: 'everyones_friend',
+        name: "Everyone's Friend",
+        description: 'Reach "Friend" status with all 13 buns',
+        sticker: '🌈',
+        category: 'friendship',
+        condition: { type: 'friends_count', count: 13, level: 'Friend' },
+        reward: { stamps: 50 }
+    },
+
+    // Explorer achievements
+    {
+        id: 'signature_seeker',
+        name: 'Signature Seeker',
+        description: 'Try a signature drink',
+        sticker: '🎯',
+        category: 'explorer',
+        condition: { type: 'signature_drinks_tried', count: 1 },
+        reward: { stamps: 3 }
+    },
+    {
+        id: 'signature_collector',
+        name: 'Signature Collector',
+        description: 'Try 5 different signature drinks',
+        sticker: '📚',
+        category: 'explorer',
+        condition: { type: 'signature_drinks_tried', count: 5 },
+        reward: { stamps: 15 }
+    },
+    {
+        id: 'signature_master',
+        name: 'Signature Master',
+        description: 'Try all 13 signature drinks',
+        sticker: '👑',
+        category: 'explorer',
+        condition: { type: 'signature_drinks_tried', count: 13 },
+        reward: { stamps: 40 }
+    },
+    {
+        id: 'meet_the_buns',
+        name: 'Meet the Buns',
+        description: 'Book sessions with 5 different buns',
+        sticker: '🐾',
+        category: 'explorer',
+        condition: { type: 'unique_buns_visited', count: 5 },
+        reward: { stamps: 10 }
+    },
+    {
+        id: 'warren_explorer',
+        name: 'Warren Explorer',
+        description: 'Book sessions with all 13 buns',
+        sticker: '🗺️',
+        category: 'explorer',
+        condition: { type: 'unique_buns_visited', count: 13 },
+        reward: { stamps: 35 }
+    },
+
+    // Loyalty achievements
+    {
+        id: 'regular',
+        name: 'Regular',
+        description: 'Book 5 sessions',
+        sticker: '🎫',
+        category: 'loyalty',
+        condition: { type: 'sessions_booked', count: 5 },
+        reward: { stamps: 8 }
+    },
+    {
+        id: 'devoted_visitor',
+        name: 'Devoted Visitor',
+        description: 'Book 15 sessions',
+        sticker: '🎖️',
+        category: 'loyalty',
+        condition: { type: 'sessions_booked', count: 15 },
+        reward: { stamps: 20 }
+    },
+    {
+        id: 'true_believer',
+        name: 'True Believer',
+        description: 'Book 50 sessions',
+        sticker: '🌟',
+        category: 'loyalty',
+        condition: { type: 'sessions_booked', count: 50 },
+        reward: { stamps: 50 }
+    },
+    {
+        id: 'stamp_collector',
+        name: 'Stamp Collector',
+        description: 'Earn 50 stamps total',
+        sticker: '💮',
+        category: 'loyalty',
+        condition: { type: 'stamps_earned', count: 50 },
+        reward: { stamps: 5 }
+    },
+    {
+        id: 'stamp_hoarder',
+        name: 'Stamp Hoarder',
+        description: 'Earn 200 stamps total',
+        sticker: '🏅',
+        category: 'loyalty',
+        condition: { type: 'stamps_earned', count: 200 },
+        reward: { stamps: 15 }
+    },
+    {
+        id: 'big_spender',
+        name: 'Big Spender',
+        description: 'Spend $100 total at the café',
+        sticker: '💰',
+        category: 'loyalty',
+        condition: { type: 'total_spent', amount: 100 },
+        reward: { stamps: 10 }
+    },
+    {
+        id: 'vip',
+        name: 'VIP Status',
+        description: 'Spend $500 total at the café',
+        sticker: '💎',
+        category: 'loyalty',
+        condition: { type: 'total_spent', amount: 500 },
+        reward: { stamps: 30 }
+    },
+
+    // Special achievements
+    {
+        id: 'legendary_find',
+        name: 'Legendary Find',
+        description: 'Book a session with a Legendary bun',
+        sticker: '⭐',
+        category: 'special',
+        condition: { type: 'rarity_visited', rarity: 'legendary' },
+        reward: { stamps: 10 }
+    },
+    {
+        id: 'rare_encounter',
+        name: 'Rare Encounter',
+        description: 'Book sessions with all Rare buns',
+        sticker: '💜',
+        category: 'special',
+        condition: { type: 'all_rarity_visited', rarity: 'rare' },
+        reward: { stamps: 20 }
+    },
+    {
+        id: 'complete_collection',
+        name: 'Complete Collection',
+        description: 'Unlock 20 achievements',
+        sticker: '🎨',
+        category: 'special',
+        condition: { type: 'achievements_unlocked', count: 20 },
+        reward: { stamps: 25 }
+    },
+    {
+        id: 'treat_giver',
+        name: 'Treat Giver',
+        description: 'Give 10 treats to buns',
+        sticker: '🥕',
+        category: 'special',
+        condition: { type: 'treats_given', count: 10 },
+        reward: { stamps: 8 }
+    },
+    {
+        id: 'toy_master',
+        name: 'Toy Master',
+        description: 'Play with 10 toys with buns',
+        sticker: '🎾',
+        category: 'special',
+        condition: { type: 'toys_played', count: 10 },
+        reward: { stamps: 8 }
+    }
+];
+
+// ============================================
 // HELPER FUNCTIONS
 // ============================================
 

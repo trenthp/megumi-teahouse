@@ -28,6 +28,7 @@
     --accent-purple: #C9A0DC;
     --accent-pink: #E891B8;
     --accent-blue: #91C8E8;
+    --primary: #FF6B8A;
 
     /* Gritty Accent Colors */
     --ink: #2D2438;
@@ -235,9 +236,10 @@ h3 { font-size: clamp(1.25rem, 3vw, 1.75rem); }
 }
 
 .nav-link.active {
-    color: var(--white);
+    color: var(--ink);
     background: var(--gradient-sakura);
-    font-weight: 500;
+    font-weight: 600;
+    border: 2px solid var(--ink);
 }
 
 .nav-actions {
@@ -593,12 +595,6 @@ h3 { font-size: clamp(1.25rem, 3vw, 1.75rem); }
     text-align: center;
     border: 2px solid var(--ink);
     box-shadow: 3px 3px 0 var(--ink);
-    transition: all 0.3s var(--bounce);
-}
-
-.stat-card:hover {
-    transform: translate(-2px, -2px);
-    box-shadow: 5px 5px 0 var(--ink);
 }
 
 .stat-icon {
@@ -1335,12 +1331,6 @@ h3 { font-size: clamp(1.25rem, 3vw, 1.75rem); }
     border-radius: var(--radius-xl);
     overflow: hidden;
     box-shadow: var(--shadow-soft);
-    transition: all 0.4s var(--bounce);
-}
-
-.shop-item:hover {
-    transform: translateY(-8px);
-    box-shadow: var(--shadow-medium);
 }
 
 .shop-item.locked {
@@ -2110,10 +2100,6 @@ h3 { font-size: clamp(1.25rem, 3vw, 1.75rem); }
     border: 3px solid var(--ink);
 }
 
-.shop-item:hover {
-    box-shadow: 5px 5px 0 var(--ink);
-}
-
 /* Cart Button - Gritty */
 .cart-btn {
     border: 2px solid var(--ink);
@@ -2363,12 +2349,6 @@ h3 { font-size: clamp(1.25rem, 3vw, 1.75rem); }
     background: var(--white);
     border: 3px solid var(--ink);
     border-radius: var(--radius-lg);
-    transition: all 0.2s var(--bounce);
-}
-
-.leaderboard-card:hover {
-    transform: translateX(5px);
-    box-shadow: 5px 5px 0 var(--ink);
 }
 
 .leaderboard-card.rank-1 {
@@ -3245,12 +3225,6 @@ h3 { font-size: clamp(1.25rem, 3vw, 1.75rem); }
     padding: var(--space-lg);
     text-align: center;
     box-shadow: 3px 3px 0 var(--ink);
-    transition: all 0.2s var(--bounce);
-}
-
-.summary-stat:hover {
-    transform: translate(-2px, -2px);
-    box-shadow: 5px 5px 0 var(--ink);
 }
 
 .summary-icon {
@@ -5077,5 +5051,1507 @@ h3 { font-size: clamp(1.25rem, 3vw, 1.75rem); }
     .checkout-total {
         width: 100%;
         text-align: center;
+    }
+}
+
+/* ============================================
+   UPSELL TOAST (Signature Item Cross-sell)
+   ============================================ */
+
+.toast-upsell {
+    flex-direction: column;
+    padding: 0;
+    min-width: 280px;
+    max-width: 320px;
+    background: var(--white);
+    border: 3px solid var(--ink);
+    border-radius: var(--radius-lg);
+    box-shadow: 6px 6px 0 var(--ink);
+    overflow: hidden;
+    border-left: 3px solid var(--ink);
+}
+
+.upsell-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-md);
+    background: var(--gradient-sakura);
+    border-bottom: 2px solid var(--ink);
+}
+
+.toast-upsell .toast-icon {
+    font-size: 1.3rem;
+}
+
+.toast-upsell .toast-message {
+    font-weight: 600;
+    color: var(--ink);
+}
+
+.upsell-content {
+    display: flex;
+    gap: var(--space-md);
+    padding: var(--space-md);
+    align-items: center;
+}
+
+.upsell-bun-img {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: var(--radius-md);
+    border: 2px solid var(--ink);
+    box-shadow: 2px 2px 0 var(--ink);
+    flex-shrink: 0;
+}
+
+.upsell-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.upsell-label {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--ink);
+}
+
+.upsell-friendship {
+    font-size: 0.8rem;
+    color: var(--text-medium);
+}
+
+.upsell-actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    padding: var(--space-md);
+    padding-top: 0;
+}
+
+.upsell-btn {
+    width: 100%;
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-md);
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s var(--bounce);
+    border: 2px solid var(--ink);
+}
+
+.upsell-btn-primary {
+    background: var(--accent-purple);
+    color: var(--white);
+    box-shadow: 3px 3px 0 var(--ink);
+}
+
+.upsell-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 4px 4px 0 var(--ink);
+}
+
+.upsell-btn-primary:active {
+    transform: translateY(1px);
+    box-shadow: 1px 1px 0 var(--ink);
+}
+
+.upsell-btn-dismiss {
+    background: transparent;
+    color: var(--text-medium);
+    border-color: transparent;
+}
+
+.upsell-btn-dismiss:hover {
+    background: var(--cream);
+    color: var(--text-dark);
+}
+
+/* Animation for upsell toast */
+.toast-upsell {
+    animation: upsellSlideIn 0.4s var(--bounce);
+}
+
+@keyframes upsellSlideIn {
+    from {
+        opacity: 0;
+        transform: translateX(100px) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+}
+
+/* Responsive upsell toast */
+@media (max-width: 400px) {
+    .toast-upsell {
+        min-width: unset;
+        max-width: calc(100vw - 40px);
+    }
+
+    .upsell-bun-img {
+        width: 50px;
+        height: 50px;
+    }
+
+    .upsell-label {
+        font-size: 0.85rem;
+    }
+}
+
+/* ============================================
+   ACHIEVEMENTS / STICKER COLLECTION
+   ============================================ */
+
+.achievements-section {
+    margin-top: 3rem;
+    padding: 2rem;
+    background: linear-gradient(135deg, #FFF9E6 0%, #FFFDF5 100%);
+    border: 3px solid var(--ink);
+    border-radius: 20px;
+    box-shadow: 6px 6px 0 var(--ink);
+}
+
+.achievements-section .section-header {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+/* Achievement Stats */
+.achievement-stats {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: white;
+    border: 2px solid var(--ink);
+    border-radius: 12px;
+}
+
+.achievement-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.achievement-stat-value {
+    font-family: 'Cherry Bomb One', cursive;
+    font-size: 1.75rem;
+    color: var(--primary);
+}
+
+.achievement-stat-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--ink-light);
+}
+
+/* Achievement Tabs */
+.achievement-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+}
+
+.achievement-tab {
+    padding: 0.5rem 1rem;
+    background: white;
+    border: 2px solid var(--ink);
+    border-radius: 20px;
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.achievement-tab:hover {
+    background: var(--cream);
+    transform: translateY(-2px);
+}
+
+.achievement-tab.active {
+    background: var(--gradient-sakura);
+    color: var(--ink);
+    font-weight: 700;
+    border-color: var(--ink);
+    box-shadow: 3px 3px 0 var(--ink);
+}
+
+/* Achievement Grid */
+.achievement-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+}
+
+/* Achievement Card */
+.achievement-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1rem;
+    background: white;
+    border: 2px solid var(--ink);
+    border-radius: 12px;
+    position: relative;
+}
+
+.achievement-card.unlocked {
+    background: linear-gradient(135deg, #FFFDF5 0%, #FFF9E6 100%);
+    border-color: var(--primary);
+}
+
+.achievement-card.unlocked::after {
+    content: '✓';
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    width: 26px;
+    height: 26px;
+    background: var(--primary);
+    border: 2px solid var(--ink);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    color: white;
+    font-weight: bold;
+    box-shadow: 2px 2px 0 var(--ink);
+}
+
+/* Achievement Sticker */
+.achievement-sticker {
+    flex-shrink: 0;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    background: linear-gradient(135deg, #FFFDF5 0%, #FFF9E6 100%);
+    border: 2px solid var(--ink);
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.achievement-card.unlocked .achievement-sticker {
+    animation: stickerPop 0.5s var(--bounce);
+}
+
+@keyframes stickerPop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2) rotate(10deg); }
+    100% { transform: scale(1); }
+}
+
+/* Achievement Info */
+.achievement-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.achievement-name {
+    font-family: 'Cherry Bomb One', cursive;
+    font-size: 1rem;
+    margin-bottom: 0.25rem;
+    color: var(--ink);
+}
+
+.achievement-desc {
+    font-size: 0.8rem;
+    color: var(--ink-light);
+    margin-bottom: 0.5rem;
+    line-height: 1.3;
+}
+
+/* Achievement Progress Bar */
+.achievement-progress {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.achievement-progress-bar {
+    flex: 1;
+    height: 8px;
+    background: #E8E0D5;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.achievement-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary) 0%, #FF9CAA 100%);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.achievement-progress-text {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--ink-light);
+    white-space: nowrap;
+}
+
+/* Achievement Reward */
+.achievement-reward {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.8rem;
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.achievement-reward-icon {
+    font-size: 0.9rem;
+}
+
+/* Category Badge */
+.achievement-category-badge {
+    position: absolute;
+    bottom: 0.5rem;
+    right: 0.5rem;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    border-radius: 6px;
+    border: 1px solid currentColor;
+}
+
+/* ============================================
+   ACHIEVEMENT UNLOCK NOTIFICATION
+   ============================================ */
+
+.achievement-notification {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-100px);
+    z-index: 10000;
+    opacity: 0;
+    transition: all 0.5s var(--bounce);
+}
+
+.achievement-notification.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+}
+
+.achievement-notification-content {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    background: linear-gradient(135deg, #FFFDF5 0%, #FFF9E6 100%);
+    border: 3px solid var(--ink);
+    border-radius: 16px;
+    box-shadow: 6px 6px 0 var(--ink), 0 10px 40px rgba(0,0,0,0.2);
+    animation: notificationGlow 2s ease-in-out infinite;
+}
+
+@keyframes notificationGlow {
+    0%, 100% { box-shadow: 6px 6px 0 var(--ink), 0 10px 40px rgba(0,0,0,0.2); }
+    50% { box-shadow: 6px 6px 0 var(--ink), 0 10px 40px rgba(255,107,139,0.4); }
+}
+
+.achievement-notification-sticker {
+    font-size: 3rem;
+    animation: stickerBounce 0.6s var(--bounce) infinite;
+}
+
+@keyframes stickerBounce {
+    0%, 100% { transform: scale(1) rotate(0deg); }
+    25% { transform: scale(1.1) rotate(-5deg); }
+    50% { transform: scale(1) rotate(0deg); }
+    75% { transform: scale(1.1) rotate(5deg); }
+}
+
+.achievement-notification-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.achievement-notification-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.achievement-notification-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--primary);
+    font-weight: 700;
+}
+
+.achievement-notification-name {
+    font-family: 'Cherry Bomb One', cursive;
+    font-size: 1.25rem;
+    color: var(--ink);
+}
+
+.achievement-notification-reward {
+    font-size: 0.85rem;
+    color: var(--primary);
+    font-weight: 600;
+}
+
+/* Responsive Achievements */
+@media (max-width: 768px) {
+    .achievement-stats {
+        gap: 1rem;
+    }
+
+    .achievement-stat-value {
+        font-size: 1.5rem;
+    }
+
+    .achievement-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .achievement-notification-content {
+        padding: 0.75rem 1rem;
+    }
+
+    .achievement-notification-sticker {
+        font-size: 2.5rem;
+    }
+
+    .achievement-notification-name {
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .achievement-tabs {
+        gap: 0.35rem;
+    }
+
+    .achievement-tab {
+        padding: 0.4rem 0.75rem;
+        font-size: 0.75rem;
+    }
+
+    .achievement-sticker {
+        width: 50px;
+        height: 50px;
+        font-size: 2rem;
+    }
+}
+
+/* ============================================
+   ENHANCED HOME PAGE
+   ============================================ */
+
+/* Section Titles */
+.home-section-title {
+    font-family: 'Cherry Bomb One', cursive;
+    font-size: 1.5rem;
+    color: var(--ink);
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+/* Welcome Section (Returning Users) */
+.home-welcome {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1.5rem 2rem;
+    background: linear-gradient(135deg, #FFFDF5 0%, #FFF9E6 100%);
+    border: 3px solid var(--ink);
+    border-radius: 16px;
+    box-shadow: 4px 4px 0 var(--ink);
+    margin-bottom: 2rem;
+}
+
+.welcome-content {
+    flex: 1;
+}
+
+.welcome-greeting {
+    font-family: 'Cherry Bomb One', cursive;
+    font-size: 1.75rem;
+    color: var(--ink);
+    margin: 0 0 0.25rem 0;
+}
+
+.welcome-message {
+    color: var(--ink-light);
+    margin: 0;
+    font-size: 1rem;
+}
+
+.welcome-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+/* Progress Section */
+.home-progress {
+    margin-bottom: 2rem;
+}
+
+.progress-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+}
+
+.progress-card {
+    background: white;
+    border: 3px solid var(--ink);
+    border-radius: 12px;
+    padding: 1rem;
+    box-shadow: 3px 3px 0 var(--ink);
+}
+
+.progress-card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.progress-card-icon {
+    font-size: 1.25rem;
+}
+
+.progress-card-title {
+    font-weight: 600;
+    color: var(--ink);
+    font-size: 0.9rem;
+}
+
+.progress-card-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.progress-reward-name,
+.progress-achievement-count {
+    font-family: 'Cherry Bomb One', cursive;
+    font-size: 1.25rem;
+    color: var(--primary);
+}
+
+.progress-bun-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.progress-bun-emoji {
+    font-size: 1.25rem;
+}
+
+.progress-bun-name {
+    font-family: 'Cherry Bomb One', cursive;
+    font-size: 1.1rem;
+    color: var(--ink);
+}
+
+.progress-bun-level {
+    font-size: 0.8rem;
+    color: var(--ink-light);
+    background: var(--cream);
+    padding: 0.15rem 0.5rem;
+    border-radius: 10px;
+}
+
+.progress-bar-container {
+    height: 10px;
+    background: #E8E0D5;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary) 0%, #FF9CAA 100%);
+    border-radius: 5px;
+    transition: width 0.5s ease;
+}
+
+.progress-text {
+    font-size: 0.8rem;
+    color: var(--ink-light);
+}
+
+/* Featured Bun Section */
+.home-featured {
+    margin-bottom: 2rem;
+}
+
+.featured-bun-card {
+    background: white;
+    border: 3px solid var(--ink);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 4px 4px 0 var(--ink);
+}
+
+.featured-bun-inner {
+    display: flex;
+    gap: 1.5rem;
+    padding: 1.5rem;
+    cursor: pointer;
+}
+
+.featured-bun-image {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.featured-bun-photo {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 12px;
+    border: 3px solid var(--ink);
+}
+
+.featured-bun-rarity {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    border-radius: 8px;
+    border: 2px solid var(--ink);
+}
+
+.featured-bun-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.featured-bun-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.featured-bun-name {
+    font-family: 'Cherry Bomb One', cursive;
+    font-size: 1.5rem;
+    margin: 0;
+    color: var(--ink);
+}
+
+.featured-bun-friendship {
+    font-size: 1.25rem;
+}
+
+.featured-bun-breed {
+    color: var(--ink-light);
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.featured-bun-personality {
+    font-style: italic;
+    color: var(--ink);
+    margin: 0;
+}
+
+.featured-bun-signature {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.25rem;
+}
+
+.featured-bun-signature .signature-label {
+    font-size: 0.8rem;
+    color: var(--ink-light);
+}
+
+.featured-bun-signature .signature-name {
+    font-weight: 600;
+    color: var(--primary);
+}
+
+/* How It Works Section (New Users) */
+.home-how-it-works {
+    margin-bottom: 2rem;
+    padding: 2rem;
+    background: linear-gradient(135deg, var(--pink-light) 0%, var(--lavender) 50%, var(--sky) 100%);
+    border: 3px solid var(--ink);
+    border-radius: 16px;
+    box-shadow: 4px 4px 0 var(--ink);
+}
+
+.how-it-works-steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+}
+
+.how-step {
+    text-align: center;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 12px;
+    border: 2px solid var(--ink);
+}
+
+.how-step-icon {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.how-step-title {
+    font-family: 'Cherry Bomb One', cursive;
+    font-size: 1.1rem;
+    margin: 0 0 0.5rem 0;
+    color: var(--ink);
+}
+
+.how-step-desc {
+    font-size: 0.85rem;
+    color: var(--ink-light);
+    margin: 0;
+    line-height: 1.4;
+}
+
+/* Trending Section */
+.home-trending {
+    margin-bottom: 2rem;
+}
+
+.trending-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 1rem;
+}
+
+.trending-item {
+    background: white;
+    border: 3px solid var(--ink);
+    border-radius: 12px;
+    padding: 1rem;
+    box-shadow: 3px 3px 0 var(--ink);
+}
+
+.trending-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--ink-light);
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+}
+
+.trending-buns-list {
+    display: flex;
+    gap: 1rem;
+}
+
+.trending-bun {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    cursor: pointer;
+    flex: 1;
+}
+
+.trending-rank {
+    font-family: 'Cherry Bomb One', cursive;
+    font-size: 0.9rem;
+    color: var(--primary);
+}
+
+.trending-bun-img {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 2px solid var(--ink);
+}
+
+.trending-bun-name {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--ink);
+    text-align: center;
+}
+
+.trending-drink {
+    cursor: pointer;
+}
+
+.trending-drink-content {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.trending-drink-cup {
+    width: 50px;
+    height: 70px;
+    border-radius: 8px 8px 16px 16px;
+    border: 2px solid var(--ink);
+}
+
+.trending-drink-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.trending-drink-name {
+    font-family: 'Cherry Bomb One', cursive;
+    font-size: 1rem;
+    color: var(--ink);
+}
+
+.trending-drink-price {
+    font-size: 0.9rem;
+    color: var(--primary);
+    font-weight: 600;
+}
+
+/* Responsive Home Page */
+@media (max-width: 768px) {
+    .home-welcome {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .welcome-actions {
+        justify-content: center;
+    }
+
+    .featured-bun-inner {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .featured-bun-header {
+        justify-content: center;
+    }
+
+    .trending-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .trending-buns-list {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .welcome-greeting {
+        font-size: 1.5rem;
+    }
+
+    .progress-cards {
+        grid-template-columns: 1fr;
+    }
+
+    .featured-bun-photo {
+        width: 120px;
+        height: 120px;
+    }
+
+    .how-it-works-steps {
+        grid-template-columns: 1fr;
+    }
+
+    .trending-bun-img {
+        width: 50px;
+        height: 50px;
+    }
+}
+
+/* ============================================
+   USER PROFILE
+   ============================================ */
+
+.profile-card {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, #FFFDF5 0%, #FFF9E6 100%);
+    border: 3px solid var(--ink);
+    border-radius: 16px;
+    box-shadow: 4px 4px 0 var(--ink);
+    margin-bottom: 2rem;
+}
+
+.profile-avatar {
+    font-size: 3rem;
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    border: 3px solid var(--ink);
+    border-radius: 50%;
+    box-shadow: 3px 3px 0 var(--ink);
+}
+
+.profile-info {
+    flex: 1;
+}
+
+.profile-name-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+}
+
+.profile-name {
+    font-family: 'Cherry Bomb One', cursive;
+    font-size: 1.5rem;
+    color: var(--ink);
+}
+
+.profile-edit-btn {
+    background: white;
+    border: 2px solid var(--ink);
+    border-radius: 8px;
+    padding: 0.35rem 0.5rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.profile-edit-btn:hover {
+    background: var(--cream);
+    transform: scale(1.1);
+}
+
+.profile-stats {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.profile-stat {
+    font-size: 0.9rem;
+    color: var(--ink-light);
+}
+
+.profile-stat strong {
+    color: var(--primary);
+    font-weight: 700;
+}
+
+.profile-member-since {
+    font-size: 0.8rem;
+    color: var(--ink-light);
+    font-style: italic;
+}
+
+/* Profile Modal */
+.profile-modal-content {
+    max-width: 400px;
+}
+
+.profile-modal-title {
+    font-family: 'Cherry Bomb One', cursive;
+    font-size: 1.5rem;
+    color: var(--ink);
+    margin: 0 0 1.5rem 0;
+    text-align: center;
+}
+
+.profile-edit-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-label {
+    font-weight: 600;
+    color: var(--ink);
+    font-size: 0.9rem;
+}
+
+.form-input {
+    padding: 0.75rem 1rem;
+    border: 2px solid var(--ink);
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1rem;
+    background: white;
+    transition: all 0.2s ease;
+}
+
+.form-input:focus {
+    outline: none;
+    box-shadow: 3px 3px 0 var(--ink);
+    transform: translate(-2px, -2px);
+}
+
+.avatar-picker {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 0.5rem;
+}
+
+.avatar-option {
+    width: 100%;
+    aspect-ratio: 1;
+    font-size: 1.5rem;
+    background: white;
+    border: 2px solid var(--ink);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.avatar-option:hover {
+    background: var(--cream);
+    transform: scale(1.1);
+}
+
+.avatar-option.selected {
+    background: var(--gradient-sakura);
+    box-shadow: 3px 3px 0 var(--ink);
+    transform: translate(-2px, -2px);
+}
+
+/* Responsive Profile */
+@media (max-width: 480px) {
+    .profile-card {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .profile-name-row {
+        justify-content: center;
+    }
+
+    .profile-stats {
+        justify-content: center;
+    }
+
+    .avatar-picker {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+/* ==========================================
+   ORDER HISTORY
+   ========================================== */
+
+.history-section {
+    margin-top: 2rem;
+}
+
+.history-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 0.5rem;
+}
+
+.history-tab {
+    padding: 0.75rem 1.5rem;
+    background: white;
+    border: 2px solid var(--ink);
+    border-radius: 20px 20px 0 0;
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: var(--ink);
+}
+
+.history-tab:hover {
+    background: var(--cream);
+}
+
+.history-tab.active {
+    background: var(--gradient-sakura);
+    color: var(--ink);
+    transform: translateY(-2px);
+    box-shadow: 2px 2px 0 var(--ink);
+}
+
+.history-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.history-item {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem;
+    background: white;
+    border: 2px solid var(--ink);
+    border-radius: 12px;
+    transition: all 0.2s ease;
+}
+
+.history-icon {
+    width: 50px;
+    height: 50px;
+    min-width: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    background: var(--cream);
+    border: 2px solid var(--ink);
+    border-radius: 10px;
+}
+
+.history-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.history-title {
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 0.25rem;
+}
+
+.history-details {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 0.5rem;
+}
+
+.history-items-list {
+    font-size: 0.8rem;
+    color: #888;
+    margin-bottom: 0.5rem;
+    line-height: 1.4;
+}
+
+.history-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    font-size: 0.8rem;
+}
+
+.history-date {
+    color: #888;
+}
+
+.history-stamps {
+    color: var(--gold);
+    font-weight: 600;
+}
+
+.history-points {
+    color: #FF69B4;
+    font-weight: 600;
+}
+
+.history-price {
+    font-weight: 700;
+    color: var(--ink);
+    display: flex;
+    align-items: center;
+    font-size: 1.1rem;
+    white-space: nowrap;
+}
+
+.history-empty {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #888;
+}
+
+.history-empty-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.history-empty-text {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.history-empty-subtext {
+    font-size: 0.85rem;
+    color: #aaa;
+}
+
+.history-more {
+    text-align: center;
+    padding: 1rem;
+    color: #888;
+    font-size: 0.9rem;
+    border-top: 1px dashed #ddd;
+    margin-top: 0.5rem;
+}
+
+/* Responsive History */
+@media (max-width: 480px) {
+    .history-tabs {
+        flex-direction: row;
+        overflow-x: auto;
+    }
+
+    .history-tab {
+        padding: 0.5rem 1rem;
+        font-size: 0.85rem;
+        white-space: nowrap;
+    }
+
+    .history-item {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .history-icon {
+        width: 40px;
+        height: 40px;
+        min-width: 40px;
+        font-size: 1.2rem;
+    }
+
+    .history-price {
+        align-self: flex-start;
+    }
+}
+
+.history-stamps.spent {
+    color: #FF6B8A;
+}
+
+.history-price.redeemed {
+    font-size: 1.5rem;
+}
+
+.history-shop {
+    background: linear-gradient(135deg, #FFF5F7 0%, white 100%);
+}
+
+/* ==========================================
+   SHOP PURCHASE FLOW
+   ========================================== */
+
+.shop-item {
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.shop-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 4px 4px 0 var(--ink);
+}
+
+.shop-item.owned {
+    background: linear-gradient(135deg, #E8F5E9 0%, white 100%);
+}
+
+.shop-item.locked {
+    opacity: 0.7;
+}
+
+.shop-item-desc {
+    font-size: 0.8rem;
+    color: #888;
+    margin-bottom: 0.5rem;
+}
+
+.shop-item-cost {
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.shop-item-cost.available {
+    color: var(--gold);
+}
+
+.shop-item-cost.locked {
+    color: #999;
+}
+
+.shop-item-cost.owned {
+    color: #4CAF50;
+}
+
+.shop-item-owned-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #4CAF50;
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 0.25rem 0.5rem;
+    border-radius: 10px;
+    text-transform: uppercase;
+}
+
+/* Shop Modal */
+.shop-modal-content {
+    max-width: 380px;
+    padding: 2rem;
+    text-align: center;
+}
+
+.shop-modal-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    text-align: left;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: var(--cream);
+    border-radius: 12px;
+}
+
+.shop-modal-icon {
+    font-size: 3rem;
+    min-width: 80px;
+    text-align: center;
+}
+
+.shop-modal-info {
+    flex: 1;
+}
+
+.shop-modal-name {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 0.25rem;
+}
+
+.shop-modal-desc {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.shop-modal-cost {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: var(--gradient-sakura);
+    border-radius: 12px;
+    border: 2px solid var(--ink);
+}
+
+.shop-modal-stamps {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 0.5rem;
+}
+
+.stamps-icon {
+    font-size: 1.75rem;
+}
+
+.stamps-amount {
+    font-size: 2rem;
+}
+
+.stamps-label {
+    font-size: 1rem;
+    font-weight: 400;
+}
+
+.shop-modal-balance {
+    font-size: 0.9rem;
+    color: var(--ink);
+}
+
+.shop-modal-actions {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.shop-modal-actions .btn {
+    flex: 1;
+}
+
+.shop-modal-note {
+    font-size: 0.85rem;
+    color: #888;
+    margin: 0;
+}
+
+.shop-modal-note.owned {
+    color: #4CAF50;
+}
+
+.shop-modal-note.locked {
+    color: #FF6B8A;
+}
+
+/* Disabled button state */
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+/* Responsive Shop Modal */
+@media (max-width: 480px) {
+    .shop-modal-content {
+        padding: 1.5rem;
+    }
+
+    .shop-modal-item {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .shop-modal-info {
+        text-align: center;
+    }
+
+    .shop-modal-actions {
+        flex-direction: column;
     }
 }
