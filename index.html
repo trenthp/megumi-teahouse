@@ -167,6 +167,18 @@
                 <p class="page-subtitle">support your favorite bun to the top!</p>
             </div>
 
+            <!-- Time Period Filters -->
+            <div class="leaderboard-filters">
+                <button class="leaderboard-filter active" data-period="all">All Time</button>
+                <button class="leaderboard-filter" data-period="month">This Month</button>
+                <button class="leaderboard-filter" data-period="week">This Week</button>
+            </div>
+
+            <!-- Your Top Bun Highlight -->
+            <div class="your-top-bun" id="yourTopBun">
+                <!-- Populated by JS if user has spending -->
+            </div>
+
             <div class="leaderboard-podium" id="leaderboardPodium">
                 <!-- Top 3 podium populated by JS -->
             </div>
@@ -224,6 +236,55 @@
                     </div>
                 </div>
             </div>
+
+            <!-- My Buns Dashboard -->
+            <div class="my-buns-section">
+                <div class="section-header">
+                    <h3 class="section-title">My Bun Collection</h3>
+                    <p class="section-subtitle">track your friendships & support</p>
+                </div>
+
+                <!-- Summary Stats -->
+                <div class="bun-summary-stats" id="bunSummaryStats">
+                    <div class="summary-stat">
+                        <span class="summary-icon">💰</span>
+                        <span class="summary-value" id="totalSpent">$0</span>
+                        <span class="summary-label">Total Spent</span>
+                    </div>
+                    <div class="summary-stat">
+                        <span class="summary-icon">🐰</span>
+                        <span class="summary-value" id="totalBunVisits">0</span>
+                        <span class="summary-label">Bun Visits</span>
+                    </div>
+                    <div class="summary-stat">
+                        <span class="summary-icon">💖</span>
+                        <span class="summary-value" id="highestFriendship">-</span>
+                        <span class="summary-label">Best Friend</span>
+                    </div>
+                    <div class="summary-stat">
+                        <span class="summary-icon">🏆</span>
+                        <span class="summary-value" id="topSupported">-</span>
+                        <span class="summary-label">Most Supported</span>
+                    </div>
+                </div>
+
+                <!-- Bun Collection Grid -->
+                <div class="bun-collection-grid" id="bunCollectionGrid">
+                    <!-- Bun cards populated by JS -->
+                </div>
+
+                <!-- Collection Progress -->
+                <div class="collection-progress">
+                    <div class="progress-header">
+                        <span class="progress-label">Friendship Progress</span>
+                        <span class="progress-count" id="friendshipCount">0/13 befriended</span>
+                    </div>
+                    <div class="progress-bar-large">
+                        <div class="progress-fill-large" id="friendshipProgressFill" style="width: 0%"></div>
+                    </div>
+                    <p class="progress-hint">Visit and give treats to increase friendship!</p>
+                </div>
+            </div>
         </section>
 
         <!-- SHOP PAGE -->
@@ -242,23 +303,40 @@
     <!-- Cart Sidebar -->
     <aside class="cart-sidebar" id="cartSidebar">
         <div class="cart-header">
-            <h3>Your Order</h3>
+            <div class="cart-header-title">
+                <span class="cart-header-icon">🧋</span>
+                <h3>Your Order</h3>
+            </div>
             <button class="cart-close" id="cartClose">&times;</button>
         </div>
         <div class="cart-items" id="cartItems">
             <!-- Cart items populated by JS -->
         </div>
         <div class="cart-footer">
-            <div class="cart-total">
-                <span>Total</span>
-                <span id="cartTotal">$0.00</span>
+            <div class="cart-summary" id="cartSummary">
+                <!-- Order summary populated by JS -->
             </div>
             <div class="cart-pickup">
                 <label for="pickupTime">Pickup Time</label>
                 <input type="datetime-local" id="pickupTime" class="pickup-input">
             </div>
-            <button class="btn btn-primary btn-full" id="checkoutBtn">Place Order</button>
-            <p class="cart-note">+1 stamp per drink!</p>
+            <button class="btn btn-primary btn-full" id="checkoutBtn">
+                <span class="checkout-text">Place Order</span>
+                <span class="checkout-total" id="checkoutTotal">$0.00</span>
+            </button>
+            <p class="cart-note">
+                <span class="cart-note-icon">⭐</span>
+                <span id="stampsPreview">+0 stamps with this order!</span>
+            </p>
+        </div>
+        <!-- Order Success Overlay -->
+        <div class="cart-success" id="cartSuccess">
+            <div class="cart-success-content">
+                <span class="success-icon">🎉</span>
+                <h3>Order Placed!</h3>
+                <p class="success-stamps" id="successStamps"></p>
+                <p class="success-message">See you soon!</p>
+            </div>
         </div>
     </aside>
 
@@ -274,6 +352,17 @@
                         <!-- Options populated by JS -->
                     </select>
                 </div>
+
+                <!-- Dynamic Bun Preview -->
+                <div class="bun-preview" id="bunPreview">
+                    <!-- Populated by JS when bun is selected -->
+                </div>
+
+                <!-- Signature Items Upsell -->
+                <div class="signature-upsell" id="signatureUpsell">
+                    <!-- Populated by JS -->
+                </div>
+
                 <div class="form-row">
                     <div class="form-group">
                         <label>Select Date & Time</label>

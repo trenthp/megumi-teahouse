@@ -1,0 +1,12 @@
+{
+  "name": "megumi-teahouse",
+  "version": "1.0.0",
+  "description": "Megumi's Usagi Cafe - Bubble tea & bunny friends",
+  "scripts": {
+    "start": "serve -l 3000",
+    "dev": "serve -l 3000"
+  },
+  "devDependencies": {
+    "serve": "^14.2.4"
+  }
+}

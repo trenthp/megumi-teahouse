@@ -1550,7 +1550,7 @@ h3 { font-size: clamp(1.25rem, 3vw, 1.75rem); }
     display: none;
     align-items: center;
     justify-content: center;
-    z-index: 300;
+    z-index: 1100;
     padding: var(--space-lg);
 }
 
@@ -1653,7 +1653,7 @@ h3 { font-size: clamp(1.25rem, 3vw, 1.75rem); }
     position: fixed;
     bottom: var(--space-xl);
     right: var(--space-xl);
-    z-index: 400;
+    z-index: 1200;
     display: flex;
     flex-direction: column;
     gap: var(--space-md);
@@ -2808,5 +2808,2274 @@ h3 { font-size: clamp(1.25rem, 3vw, 1.75rem); }
 
     .snack-card {
         flex-direction: row;
+    }
+}
+
+/* ============================================
+   NEW ELEMENTS - Rabbit Photos, Breeds, Stats
+   ============================================ */
+
+/* ---------- Rabbit Card with Photos ---------- */
+.rabbit-card-image {
+    height: 200px;
+    position: relative;
+    overflow: hidden;
+    background: var(--gradient-dream);
+}
+
+.rabbit-photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    transition: transform 0.4s var(--bounce);
+}
+
+.rabbit-card:hover .rabbit-photo {
+    transform: scale(1.08);
+}
+
+.rabbit-friendship-badge {
+    position: absolute;
+    top: var(--space-md);
+    left: var(--space-md);
+    background: var(--white);
+    border: 2px solid var(--ink);
+    border-radius: var(--radius-full);
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    box-shadow: 2px 2px 0 var(--ink);
+    z-index: 2;
+}
+
+.rabbit-breed {
+    font-size: 0.75rem;
+    color: var(--accent-purple);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: var(--space-xs);
+}
+
+/* ---------- Mini Stat Bars (Card View) ---------- */
+.rabbit-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-md);
+    margin-top: var(--space-md);
+}
+
+.rabbit-stat {
+    text-align: center;
+    padding: var(--space-sm);
+    background: var(--cream);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--lavender);
+}
+
+.stat-bar-mini {
+    height: 6px;
+    background: var(--white);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+    margin-bottom: var(--space-xs);
+    border: 1px solid var(--lavender);
+}
+
+.stat-fill-mini {
+    height: 100%;
+    background: linear-gradient(90deg, var(--pink), var(--lavender));
+    border-radius: var(--radius-full);
+    transition: width 0.5s var(--bounce-soft);
+}
+
+.stat-fill-mini.spice {
+    background: linear-gradient(90deg, var(--peach-deep), var(--coral));
+}
+
+.rabbit-stat-label {
+    font-size: 0.65rem;
+    color: var(--text-light);
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+/* ---------- Rabbit Detail Modal with Photos ---------- */
+.rabbit-detail-header {
+    display: flex;
+    gap: var(--space-lg);
+    padding: var(--space-xl);
+    background: var(--white);
+    border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+    margin-bottom: var(--space-lg);
+    align-items: center;
+}
+
+.rabbit-detail-photo {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: var(--radius-lg);
+    border: 3px solid var(--ink);
+    box-shadow: 4px 4px 0 var(--ink);
+    flex-shrink: 0;
+}
+
+.rabbit-detail-titles {
+    flex: 1;
+    text-align: left;
+}
+
+.rabbit-detail-rarity {
+    display: inline-block;
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: var(--radius-full);
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-bottom: var(--space-sm);
+    border: 2px solid var(--ink);
+}
+
+.rabbit-detail-name {
+    font-size: 1.5rem;
+    margin: 0 0 var(--space-xs) 0;
+    color: var(--ink);
+}
+
+.rabbit-detail-breed {
+    font-size: 0.85rem;
+    color: var(--accent-purple);
+    font-weight: 600;
+    margin-bottom: var(--space-xs);
+}
+
+.rabbit-detail-title {
+    font-size: 0.85rem;
+    color: var(--text-light);
+    font-style: italic;
+    margin: 0;
+}
+
+/* ---------- Detail Stat Bars with Values ---------- */
+.rabbit-detail-stats {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    margin-bottom: var(--space-lg);
+}
+
+.detail-stat {
+    background: var(--white);
+    padding: var(--space-md);
+    border-radius: var(--radius-md);
+    border: 2px solid var(--ink);
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+}
+
+.detail-stat-label {
+    font-size: 0.75rem;
+    color: var(--text-medium);
+    text-transform: uppercase;
+    font-weight: 600;
+    min-width: 80px;
+}
+
+.detail-stat-bar {
+    flex: 1;
+    height: 12px;
+    background: var(--cream);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+    border: 1px solid var(--lavender);
+}
+
+.detail-stat-fill {
+    height: 100%;
+    border-radius: var(--radius-full);
+    transition: width 0.5s var(--bounce-soft);
+}
+
+.detail-stat-fill.fluff {
+    background: linear-gradient(90deg, var(--pink), var(--lavender-deep));
+}
+
+.detail-stat-fill.spice {
+    background: linear-gradient(90deg, var(--peach-deep), var(--coral));
+}
+
+.detail-stat-value {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--accent-purple);
+    min-width: 35px;
+    text-align: right;
+}
+
+/* ---------- Rabbit Preferences (Likes/Dislikes) ---------- */
+.rabbit-preferences {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-md);
+    margin-bottom: var(--space-lg);
+}
+
+.preference-section {
+    background: var(--white);
+    padding: var(--space-md);
+    border-radius: var(--radius-md);
+    border: 2px solid var(--ink);
+}
+
+.preference-title {
+    font-family: 'Cherry Bomb One', cursive;
+    font-size: 0.9rem;
+    margin-bottom: var(--space-sm);
+}
+
+.preference-title.likes {
+    color: var(--accent-purple);
+}
+
+.preference-title.dislikes {
+    color: var(--accent-pink);
+}
+
+.preference-list {
+    font-size: 0.8rem;
+    color: var(--text-medium);
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* ---------- Leaderboard with Photos ---------- */
+.leaderboard-img {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: var(--radius-md);
+    border: 2px solid var(--ink);
+    box-shadow: 2px 2px 0 var(--ink);
+}
+
+.leaderboard-rarity {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+/* ---------- Podium with Photos ---------- */
+.podium-img {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: var(--radius-full);
+    border: 3px solid var(--ink);
+    box-shadow: 3px 3px 0 var(--ink);
+    margin-bottom: var(--space-sm);
+    background: var(--white);
+}
+
+.podium-1 .podium-img {
+    width: 80px;
+    height: 80px;
+    border-color: #B8860B;
+    box-shadow: 3px 3px 0 #B8860B;
+}
+
+/* ---------- Bun Match in Drink Modal ---------- */
+.bun-match-img {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: var(--radius-md);
+    border: 2px solid var(--ink);
+    box-shadow: 2px 2px 0 var(--ink);
+}
+
+/* ---------- Daily Check-in with Photo ---------- */
+.checkin-rabbit {
+    min-width: 80px;
+    min-height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.checkin-rabbit-img {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: var(--radius-lg);
+    border: 3px solid var(--ink);
+    box-shadow: 3px 3px 0 var(--ink);
+    animation: bunnyBounce 2s var(--bounce-soft) infinite;
+}
+
+/* ---------- Drink/Snack Rabbit Badge with Photo ---------- */
+.drink-rabbit-badge,
+.snack-rabbit-badge {
+    overflow: hidden;
+}
+
+.drink-rabbit-img,
+.snack-rabbit-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: var(--radius-full);
+}
+
+/* ---------- Responsive Updates for Photos ---------- */
+@media (max-width: 768px) {
+    .rabbit-detail-header {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .rabbit-detail-titles {
+        text-align: center;
+    }
+
+    .rabbit-detail-photo {
+        width: 100px;
+        height: 100px;
+    }
+
+    .rabbit-preferences {
+        grid-template-columns: 1fr;
+    }
+
+    .podium-img {
+        width: 50px;
+        height: 50px;
+    }
+
+    .podium-1 .podium-img {
+        width: 65px;
+        height: 65px;
+    }
+
+    .leaderboard-img {
+        width: 40px;
+        height: 40px;
+    }
+}
+
+@media (max-width: 480px) {
+    .rabbit-card-image {
+        height: 160px;
+    }
+
+    .rabbit-detail-photo {
+        width: 80px;
+        height: 80px;
+    }
+
+    .detail-stat {
+        flex-wrap: wrap;
+    }
+
+    .detail-stat-label {
+        min-width: 100%;
+        margin-bottom: var(--space-xs);
+    }
+
+    .detail-stat-bar {
+        flex: 1;
+    }
+
+    .checkin-card {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .checkin-rabbit-img {
+        width: 70px;
+        height: 70px;
+    }
+}
+
+/* ============================================
+   MY BUNS DASHBOARD
+   ============================================ */
+
+/* ---------- Dashboard Section ---------- */
+.my-buns-section {
+    margin-top: var(--space-3xl);
+    padding-top: var(--space-2xl);
+    border-top: 4px solid var(--ink);
+}
+
+.section-header {
+    text-align: center;
+    margin-bottom: var(--space-2xl);
+}
+
+.section-title {
+    font-family: 'Cherry Bomb One', cursive;
+    font-size: 1.8rem;
+    color: var(--ink);
+    margin-bottom: var(--space-xs);
+}
+
+.section-subtitle {
+    color: var(--text-medium);
+    font-size: 0.95rem;
+}
+
+/* ---------- Summary Stats ---------- */
+.bun-summary-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-md);
+    margin-bottom: var(--space-2xl);
+}
+
+.summary-stat {
+    background: var(--white);
+    border: 3px solid var(--ink);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    text-align: center;
+    box-shadow: 3px 3px 0 var(--ink);
+    transition: all 0.2s var(--bounce);
+}
+
+.summary-stat:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 5px 5px 0 var(--ink);
+}
+
+.summary-icon {
+    font-size: 1.8rem;
+    display: block;
+    margin-bottom: var(--space-sm);
+}
+
+.summary-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--accent-purple);
+    display: block;
+    margin-bottom: var(--space-xs);
+}
+
+.summary-label {
+    font-size: 0.75rem;
+    color: var(--text-light);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* ---------- Bun Collection Grid ---------- */
+.bun-collection-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: var(--space-lg);
+    margin-bottom: var(--space-2xl);
+}
+
+.bun-collection-card {
+    background: var(--white);
+    border: 3px solid var(--ink);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.3s var(--bounce);
+    position: relative;
+}
+
+.bun-collection-card:hover {
+    transform: translateY(-5px) rotate(-1deg);
+    box-shadow: 5px 5px 0 var(--ink);
+}
+
+.bun-collection-card.not-collected {
+    opacity: 0.7;
+}
+
+.bun-collection-card.not-collected:hover {
+    opacity: 1;
+}
+
+.collection-card-image {
+    height: 120px;
+    position: relative;
+    overflow: hidden;
+    background: var(--gradient-dream);
+}
+
+.collection-photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s var(--bounce);
+}
+
+.collection-photo.grayscale {
+    filter: grayscale(80%) opacity(0.7);
+}
+
+.bun-collection-card:hover .collection-photo {
+    transform: scale(1.1);
+}
+
+.bun-collection-card:hover .collection-photo.grayscale {
+    filter: grayscale(0%) opacity(1);
+}
+
+.collection-rarity {
+    position: absolute;
+    top: var(--space-sm);
+    right: var(--space-sm);
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+    font-size: 0.6rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    border: 2px solid var(--ink);
+}
+
+.collection-friendship-icon {
+    position: absolute;
+    top: var(--space-sm);
+    left: var(--space-sm);
+    background: var(--white);
+    border: 2px solid var(--ink);
+    border-radius: var(--radius-full);
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    box-shadow: 2px 2px 0 var(--ink);
+}
+
+.collection-card-info {
+    padding: var(--space-md);
+}
+
+.collection-name {
+    font-family: 'Cherry Bomb One', cursive;
+    font-size: 1rem;
+    color: var(--ink);
+    margin: 0 0 var(--space-xs) 0;
+}
+
+.collection-level {
+    font-size: 0.75rem;
+    color: var(--accent-purple);
+    font-weight: 600;
+    margin: 0 0 var(--space-sm) 0;
+}
+
+.collection-progress-bar {
+    height: 6px;
+    background: var(--cream);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+    margin-bottom: var(--space-sm);
+    border: 1px solid var(--lavender);
+}
+
+.collection-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent-pink), var(--accent-purple));
+    border-radius: var(--radius-full);
+    transition: width 0.5s var(--bounce-soft);
+}
+
+.collection-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-xs);
+    text-align: center;
+}
+
+.collection-stat {
+    background: var(--cream);
+    border-radius: var(--radius-sm);
+    padding: var(--space-xs);
+}
+
+.collection-stat-value {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--ink);
+    display: block;
+}
+
+.collection-stat-label {
+    font-size: 0.55rem;
+    color: var(--text-light);
+    text-transform: uppercase;
+}
+
+/* ---------- Collection Progress ---------- */
+.collection-progress {
+    background: var(--white);
+    border: 3px solid var(--ink);
+    border-radius: var(--radius-lg);
+    padding: var(--space-xl);
+    text-align: center;
+    box-shadow: 4px 4px 0 var(--ink);
+}
+
+.progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-md);
+}
+
+.progress-label {
+    font-family: 'Cherry Bomb One', cursive;
+    font-size: 1rem;
+    color: var(--ink);
+}
+
+.progress-count {
+    font-size: 0.9rem;
+    color: var(--accent-purple);
+    font-weight: 600;
+}
+
+.progress-bar-large {
+    height: 20px;
+    background: var(--cream);
+    border: 2px solid var(--ink);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+    margin-bottom: var(--space-md);
+}
+
+.progress-fill-large {
+    height: 100%;
+    background: linear-gradient(90deg, var(--pink), var(--lavender), var(--accent-purple));
+    border-radius: var(--radius-full);
+    transition: width 0.5s var(--bounce-soft);
+    position: relative;
+}
+
+.progress-fill-large::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255,255,255,0.3) 50%,
+        transparent 100%
+    );
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+.progress-hint {
+    font-size: 0.85rem;
+    color: var(--text-light);
+    margin: 0;
+}
+
+/* ---------- Responsive Dashboard ---------- */
+@media (max-width: 900px) {
+    .bun-summary-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .bun-collection-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .collection-card-image {
+        height: 100px;
+    }
+
+    .progress-header {
+        flex-direction: column;
+        gap: var(--space-sm);
+    }
+}
+
+@media (max-width: 480px) {
+    .bun-summary-stats {
+        grid-template-columns: 1fr 1fr;
+        gap: var(--space-sm);
+    }
+
+    .summary-stat {
+        padding: var(--space-md);
+    }
+
+    .summary-icon {
+        font-size: 1.5rem;
+    }
+
+    .summary-value {
+        font-size: 1.2rem;
+    }
+
+    .bun-collection-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--space-md);
+    }
+
+    .collection-card-image {
+        height: 80px;
+    }
+
+    .collection-stats {
+        display: none;
+    }
+
+    .collection-card-info {
+        padding: var(--space-sm);
+    }
+}
+
+/* ============================================
+   ENHANCED SCHEDULE MODAL
+   ============================================ */
+
+/* ---------- Bun Preview Card ---------- */
+.bun-preview {
+    margin-bottom: var(--space-lg);
+}
+
+.bun-preview-card {
+    display: flex;
+    gap: var(--space-md);
+    padding: var(--space-md);
+    background: var(--gradient-sakura);
+    border: 3px solid var(--ink);
+    border-radius: var(--radius-lg);
+    box-shadow: 4px 4px 0 var(--ink);
+}
+
+.bun-preview-image {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.bun-preview-photo {
+    width: 90px;
+    height: 90px;
+    object-fit: cover;
+    border-radius: var(--radius-md);
+    border: 3px solid var(--ink);
+    box-shadow: 3px 3px 0 var(--ink);
+}
+
+.bun-preview-rarity {
+    position: absolute;
+    bottom: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+    font-size: 0.55rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    border: 2px solid var(--ink);
+    white-space: nowrap;
+}
+
+.bun-preview-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.bun-preview-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-xs);
+    flex-wrap: wrap;
+}
+
+.bun-preview-name {
+    font-family: 'Cherry Bomb One', cursive;
+    font-size: 1.2rem;
+    color: var(--ink);
+    margin: 0;
+}
+
+.bun-preview-friendship {
+    font-size: 0.75rem;
+    color: var(--text-medium);
+    background: var(--white);
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--ink);
+}
+
+.bun-preview-personality {
+    font-size: 0.8rem;
+    color: var(--text-medium);
+    margin: 0 0 var(--space-xs) 0;
+}
+
+.bun-preview-quote {
+    font-size: 0.85rem;
+    color: var(--ink);
+    font-style: italic;
+    margin: 0;
+    line-height: 1.4;
+}
+
+/* ---------- Signature Upsell Section ---------- */
+.signature-upsell {
+    margin-bottom: var(--space-lg);
+}
+
+.signature-upsell-header {
+    margin-bottom: var(--space-md);
+}
+
+.signature-upsell-title {
+    font-family: 'Cherry Bomb One', cursive;
+    font-size: 1rem;
+    color: var(--accent-purple);
+}
+
+.signature-upsell-items {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+}
+
+.signature-upsell-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    padding: var(--space-md);
+    background: var(--white);
+    border: 2px solid var(--ink);
+    border-radius: var(--radius-md);
+    transition: all 0.2s var(--bounce);
+}
+
+.signature-upsell-item:hover {
+    transform: translateX(3px);
+    box-shadow: 3px 3px 0 var(--ink);
+}
+
+.signature-upsell-visual {
+    flex-shrink: 0;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.signature-upsell-cup {
+    width: 35px;
+    height: 50px;
+    border-radius: 6px 6px 15px 15px;
+    box-shadow: inset 0 0 15px rgba(255,255,255,0.5);
+}
+
+.signature-upsell-icon {
+    font-size: 2rem;
+}
+
+.signature-upsell-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.signature-upsell-label {
+    font-size: 0.7rem;
+    color: var(--text-light);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.signature-upsell-name {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--ink);
+    line-height: 1.3;
+}
+
+.signature-upsell-price {
+    font-size: 0.85rem;
+    color: var(--accent-purple);
+    font-weight: 700;
+}
+
+.signature-add-btn {
+    flex-shrink: 0;
+    min-width: 70px;
+}
+
+.signature-add-btn.added {
+    background: var(--mint);
+    border-color: var(--mint-deep);
+    color: var(--ink);
+    cursor: default;
+}
+
+/* ---------- Responsive Schedule Modal ---------- */
+@media (max-width: 600px) {
+    .bun-preview-card {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .bun-preview-header {
+        justify-content: center;
+    }
+
+    .bun-preview-info {
+        align-items: center;
+    }
+
+    .signature-upsell-item {
+        flex-wrap: wrap;
+    }
+
+    .signature-upsell-info {
+        flex: 1 1 calc(100% - 70px);
+    }
+
+    .signature-add-btn {
+        width: 100%;
+        margin-top: var(--space-sm);
+    }
+}
+
+/* ============================================
+   LEADERBOARD POLISH
+   ============================================ */
+
+/* ---------- Time Period Filters ---------- */
+.leaderboard-filters {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-xl);
+    flex-wrap: wrap;
+}
+
+.leaderboard-filter {
+    padding: var(--space-sm) var(--space-lg);
+    background: var(--white);
+    border: 3px solid var(--ink);
+    border-radius: var(--radius-full);
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-dark);
+    cursor: pointer;
+    transition: all 0.2s var(--bounce);
+    box-shadow: 3px 3px 0 var(--ink);
+}
+
+.leaderboard-filter:hover {
+    transform: translateY(-2px);
+    box-shadow: 4px 4px 0 var(--ink);
+}
+
+.leaderboard-filter.active {
+    background: var(--gradient-sakura);
+    color: var(--ink);
+    transform: translateY(2px);
+    box-shadow: 1px 1px 0 var(--ink);
+}
+
+/* ---------- Your Top Bun Section ---------- */
+.your-top-bun {
+    max-width: 400px;
+    margin: 0 auto var(--space-2xl);
+}
+
+.your-top-bun-card {
+    position: relative;
+    display: flex;
+    gap: var(--space-md);
+    padding: var(--space-lg);
+    background: linear-gradient(135deg, var(--lavender) 0%, var(--pink-light) 100%);
+    border: 4px solid var(--ink);
+    border-radius: var(--radius-xl);
+    box-shadow: 6px 6px 0 var(--ink);
+    overflow: hidden;
+}
+
+.your-top-bun-card::before {
+    content: '';
+    position: absolute;
+    top: -20px;
+    right: -20px;
+    width: 80px;
+    height: 80px;
+    background: var(--accent-purple);
+    opacity: 0.1;
+    border-radius: 50%;
+}
+
+.your-top-bun-badge {
+    position: absolute;
+    top: -10px;
+    left: 20px;
+    padding: var(--space-xs) var(--space-md);
+    background: var(--accent-purple);
+    color: var(--white);
+    font-family: 'Cherry Bomb One', cursive;
+    font-size: 0.75rem;
+    border: 2px solid var(--ink);
+    border-radius: var(--radius-full);
+    box-shadow: 2px 2px 0 var(--ink);
+    z-index: 1;
+}
+
+.your-top-bun-image {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.your-top-bun-photo {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: var(--radius-md);
+    border: 3px solid var(--ink);
+    box-shadow: 3px 3px 0 var(--ink);
+}
+
+.your-top-bun-crown {
+    position: absolute;
+    top: -18px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 1.5rem;
+    filter: drop-shadow(1px 1px 0 var(--ink));
+}
+
+.your-top-bun-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.your-top-bun-name {
+    font-family: 'Cherry Bomb One', cursive;
+    font-size: 1.3rem;
+    color: var(--ink);
+    margin-bottom: var(--space-xs);
+}
+
+.your-top-bun-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+}
+
+.your-top-stat {
+    display: flex;
+    flex-direction: column;
+    padding: var(--space-xs) var(--space-sm);
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: var(--radius-sm);
+    border: 2px solid var(--ink);
+}
+
+.your-top-stat-value {
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--accent-purple);
+}
+
+.your-top-stat-label {
+    font-size: 0.65rem;
+    color: var(--text-light);
+    text-transform: uppercase;
+}
+
+.your-top-bun-empty {
+    text-align: center;
+    padding: var(--space-xl);
+    background: var(--cream);
+    border: 3px dashed var(--ink-light);
+    border-radius: var(--radius-xl);
+    color: var(--text-medium);
+}
+
+.your-top-bun-empty-icon {
+    font-size: 2.5rem;
+    margin-bottom: var(--space-md);
+    opacity: 0.5;
+}
+
+/* ---------- Rank Movement Indicators ---------- */
+.leaderboard-rank-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 50px;
+}
+
+.rank-movement {
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: var(--radius-full);
+    margin-top: 2px;
+}
+
+.rank-movement.up {
+    color: #22c55e;
+    background: rgba(34, 197, 94, 0.1);
+}
+
+.rank-movement.down {
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.1);
+}
+
+.rank-movement.stable {
+    color: var(--text-light);
+    background: rgba(0, 0, 0, 0.05);
+    font-size: 0.6rem;
+}
+
+/* Podium Movement Indicators */
+.podium-movement {
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: var(--radius-full);
+    margin-top: var(--space-xs);
+}
+
+.podium-movement.up {
+    color: #22c55e;
+    background: rgba(34, 197, 94, 0.15);
+}
+
+.podium-movement.down {
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.15);
+}
+
+.podium-movement.stable {
+    color: var(--text-light);
+    background: rgba(0, 0, 0, 0.05);
+}
+
+/* ---------- User Top Bun Highlight ---------- */
+.leaderboard-card.user-top-bun {
+    background: linear-gradient(135deg, var(--lavender) 0%, var(--pink-light) 100%);
+    border-color: var(--accent-purple);
+    position: relative;
+}
+
+.leaderboard-card.user-top-bun::after {
+    content: 'YOUR #1';
+    position: absolute;
+    top: -10px;
+    right: 15px;
+    padding: 3px 10px;
+    background: var(--accent-purple);
+    color: var(--white);
+    font-size: 0.6rem;
+    font-weight: 700;
+    border-radius: var(--radius-full);
+    border: 2px solid var(--ink);
+    box-shadow: 2px 2px 0 var(--ink);
+}
+
+.user-top-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: var(--space-sm);
+    padding: 2px 8px;
+    background: var(--accent-purple);
+    color: var(--white);
+    font-size: 0.6rem;
+    font-weight: 600;
+    border-radius: var(--radius-full);
+    vertical-align: middle;
+}
+
+/* ---------- Responsive Leaderboard Polish ---------- */
+@media (max-width: 768px) {
+    .leaderboard-filters {
+        gap: var(--space-xs);
+    }
+
+    .leaderboard-filter {
+        padding: var(--space-xs) var(--space-md);
+        font-size: 0.8rem;
+    }
+
+    .your-top-bun-card {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .your-top-bun-stats {
+        justify-content: center;
+    }
+
+    .your-top-bun-badge {
+        left: 50%;
+        transform: translateX(-50%);
+    }
+}
+
+@media (max-width: 480px) {
+    .leaderboard-filter {
+        flex: 1 1 auto;
+        text-align: center;
+    }
+
+    .your-top-bun-photo {
+        width: 70px;
+        height: 70px;
+    }
+
+    .rank-movement {
+        font-size: 0.6rem;
+        padding: 1px 4px;
+    }
+
+    .leaderboard-card.user-top-bun::after {
+        font-size: 0.5rem;
+        padding: 2px 6px;
+    }
+}
+
+/* ============================================
+   ENHANCED RABBIT DETAIL MODAL
+   ============================================ */
+
+/* ---------- Detail Badges Row ---------- */
+.rabbit-detail-badges {
+    display: flex;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-sm);
+    flex-wrap: wrap;
+}
+
+.rabbit-detail-rank {
+    display: inline-block;
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: var(--radius-full);
+    font-size: 0.75rem;
+    font-weight: 700;
+    border: 2px solid var(--ink);
+}
+
+.rabbit-detail-rank.rank-1 {
+    background: linear-gradient(135deg, #FFD700 0%, #FFC107 100%);
+    color: #5D4E00;
+}
+
+.rabbit-detail-rank.rank-2 {
+    background: linear-gradient(135deg, #E8E8E8 0%, #C0C0C0 100%);
+    color: #4A4A4A;
+}
+
+.rabbit-detail-rank.rank-3 {
+    background: linear-gradient(135deg, #FFD4B0 0%, #CD7F32 100%);
+    color: #5D3A00;
+}
+
+.rabbit-detail-rank.rank-other {
+    background: var(--cream);
+    color: var(--text-medium);
+}
+
+/* ---------- Enhanced Friendship Display ---------- */
+.friendship-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-sm);
+}
+
+.friendship-next {
+    font-size: 0.75rem;
+    color: var(--text-light);
+    font-style: italic;
+}
+
+.friendship-max {
+    font-size: 0.75rem;
+    color: var(--accent-purple);
+    font-weight: 700;
+    background: var(--lavender);
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+}
+
+.friendship-stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-sm);
+    margin: var(--space-md) 0;
+}
+
+.friendship-stat {
+    text-align: center;
+    padding: var(--space-xs);
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: var(--radius-sm);
+}
+
+.friendship-stat-value {
+    display: block;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--accent-purple);
+}
+
+.friendship-stat-label {
+    display: block;
+    font-size: 0.6rem;
+    color: var(--text-light);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.friendship-hint {
+    font-size: 0.8rem;
+    color: var(--accent-pink);
+    font-weight: 600;
+    margin: var(--space-sm) 0;
+    text-align: center;
+}
+
+/* ---------- Enhanced Signature Items ---------- */
+.signature-items-enhanced {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-md);
+}
+
+.signature-item-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--space-md);
+    background: var(--white);
+    border: 2px solid var(--ink);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.2s var(--bounce);
+    text-align: center;
+}
+
+.signature-item-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 4px 4px 0 var(--ink);
+}
+
+.signature-item-visual {
+    margin-bottom: var(--space-sm);
+}
+
+.signature-cup-large {
+    width: 40px;
+    height: 55px;
+    border-radius: 6px 6px 14px 14px;
+    box-shadow: inset 0 0 20px rgba(255,255,255,0.4);
+}
+
+.signature-snack-icon {
+    font-size: 2.5rem;
+    display: block;
+}
+
+.signature-item-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.signature-item-type {
+    font-size: 0.6rem;
+    color: var(--text-light);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.signature-item-name {
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--ink);
+    line-height: 1.2;
+}
+
+.signature-item-price {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--accent-purple);
+}
+
+/* ---------- User Support Section ---------- */
+.rabbit-support-section {
+    margin: var(--space-lg) 0;
+    padding: var(--space-md);
+    background: linear-gradient(135deg, var(--lavender) 0%, var(--pink-light) 100%);
+    border: 2px solid var(--ink);
+    border-radius: var(--radius-md);
+}
+
+.support-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-xs);
+}
+
+.support-label {
+    font-family: 'Cherry Bomb One', cursive;
+    font-size: 0.9rem;
+    color: var(--ink);
+}
+
+.support-value {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--accent-purple);
+}
+
+.support-hint {
+    font-size: 0.8rem;
+    color: var(--text-medium);
+    margin: 0;
+}
+
+/* ---------- Responsive Enhanced Modal ---------- */
+@media (max-width: 480px) {
+    .rabbit-detail-badges {
+        justify-content: center;
+    }
+
+    .friendship-header {
+        flex-direction: column;
+        gap: var(--space-xs);
+        text-align: center;
+    }
+
+    .friendship-stats-row {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .signature-items-enhanced {
+        grid-template-columns: 1fr;
+    }
+
+    .signature-item-card {
+        flex-direction: row;
+        text-align: left;
+        gap: var(--space-md);
+    }
+
+    .signature-item-visual {
+        margin-bottom: 0;
+    }
+
+    .signature-cup-large {
+        width: 30px;
+        height: 42px;
+    }
+
+    .signature-snack-icon {
+        font-size: 2rem;
+    }
+}
+
+/* ============================================
+   ENHANCED DRINK BUN CROSS-SELL
+   ============================================ */
+
+.drink-bun-match.enhanced {
+    position: relative;
+    background: linear-gradient(135deg, var(--lavender) 0%, var(--pink-light) 100%);
+    border: 3px solid var(--ink);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    padding-top: calc(var(--space-lg) + 10px);
+    margin: var(--space-lg) 0;
+    box-shadow: 4px 4px 0 var(--ink);
+    overflow: visible;
+}
+
+.bun-match-ribbon {
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--accent-purple);
+    color: var(--white);
+    font-family: 'Cherry Bomb One', cursive;
+    font-size: 0.7rem;
+    padding: var(--space-xs) var(--space-md);
+    border-radius: var(--radius-full);
+    border: 2px solid var(--ink);
+    box-shadow: 2px 2px 0 var(--ink);
+    white-space: nowrap;
+}
+
+.bun-match-content {
+    display: flex;
+    gap: var(--space-md);
+    align-items: center;
+    margin-bottom: var(--space-md);
+}
+
+.bun-match-photo-wrap {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.drink-bun-match.enhanced .bun-match-img {
+    width: 70px;
+    height: 70px;
+    border-radius: var(--radius-md);
+    border: 3px solid var(--ink);
+    box-shadow: 3px 3px 0 var(--ink);
+}
+
+.bun-match-rank {
+    position: absolute;
+    bottom: -5px;
+    right: -5px;
+    background: var(--white);
+    color: var(--ink);
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: var(--radius-full);
+    border: 2px solid var(--ink);
+    box-shadow: 1px 1px 0 var(--ink);
+}
+
+.bun-match-details {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+}
+
+.bun-match-name {
+    font-family: 'Cherry Bomb One', cursive;
+    font-size: 1.2rem;
+    color: var(--ink);
+}
+
+.bun-match-breed {
+    font-size: 0.8rem;
+    color: var(--accent-purple);
+    font-weight: 600;
+}
+
+.bun-match-badges {
+    display: flex;
+    gap: var(--space-sm);
+    flex-wrap: wrap;
+}
+
+.drink-bun-match.enhanced .bun-match-friendship {
+    font-size: 0.75rem;
+    color: var(--text-dark);
+    background: rgba(255, 255, 255, 0.7);
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+}
+
+.bun-match-rarity {
+    font-size: 0.6rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--ink);
+}
+
+.bun-match-cta {
+    width: 100%;
+    animation: subtlePulse 2s infinite;
+}
+
+@keyframes subtlePulse {
+    0%, 100% { box-shadow: 3px 3px 0 var(--ink); }
+    50% { box-shadow: 4px 4px 0 var(--ink), 0 0 8px var(--accent-purple); }
+}
+
+/* ---------- Responsive Drink Cross-sell ---------- */
+@media (max-width: 400px) {
+    .bun-match-content {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .bun-match-badges {
+        justify-content: center;
+    }
+}
+
+/* ============================================
+   MODAL POLISH & ENHANCEMENTS
+   ============================================ */
+
+/* ---------- Enhanced Modal Backdrop ---------- */
+.modal::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at center, transparent 0%, rgba(45, 36, 56, 0.3) 100%);
+    pointer-events: none;
+}
+
+/* ---------- Enhanced Modal Content ---------- */
+.modal-content {
+    border: 3px solid var(--ink);
+    box-shadow: 8px 8px 0 var(--ink);
+}
+
+/* ---------- Enhanced Modal Close Button ---------- */
+.modal-close {
+    width: 40px;
+    height: 40px;
+    background: var(--white);
+    border: 2px solid var(--ink);
+    box-shadow: 2px 2px 0 var(--ink);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+.modal-close:hover {
+    background: var(--coral);
+    transform: rotate(90deg) scale(1.1);
+    box-shadow: 3px 3px 0 var(--ink);
+}
+
+.modal-close:active {
+    transform: rotate(90deg) scale(0.95);
+    box-shadow: 1px 1px 0 var(--ink);
+}
+
+/* ---------- Staggered Content Animation ---------- */
+.rabbit-card-inner > *,
+.drink-card-inner > *,
+.schedule-form > * {
+    animation: fadeSlideUp 0.4s var(--smooth) backwards;
+}
+
+.rabbit-card-inner > *:nth-child(1) { animation-delay: 0.05s; }
+.rabbit-card-inner > *:nth-child(2) { animation-delay: 0.1s; }
+.rabbit-card-inner > *:nth-child(3) { animation-delay: 0.15s; }
+.rabbit-card-inner > *:nth-child(4) { animation-delay: 0.2s; }
+.rabbit-card-inner > *:nth-child(5) { animation-delay: 0.25s; }
+.rabbit-card-inner > *:nth-child(6) { animation-delay: 0.3s; }
+.rabbit-card-inner > *:nth-child(7) { animation-delay: 0.35s; }
+.rabbit-card-inner > *:nth-child(8) { animation-delay: 0.4s; }
+
+@keyframes fadeSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ---------- Improved Form Elements ---------- */
+.form-input,
+.form-select {
+    border: 2px solid var(--ink-light);
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.form-input:focus,
+.form-select:focus {
+    border-color: var(--accent-purple);
+    box-shadow: 0 0 0 3px rgba(201, 160, 220, 0.2), inset 0 2px 4px rgba(0,0,0,0.05);
+}
+
+/* ---------- Schedule Modal Polish ---------- */
+.schedule-modal h3 {
+    font-family: 'Cherry Bomb One', cursive;
+    position: relative;
+    display: inline-block;
+    width: 100%;
+}
+
+.schedule-modal h3::after {
+    content: '🐰';
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.5rem;
+}
+
+.schedule-modal h3::before {
+    content: '🐰';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%) scaleX(-1);
+    font-size: 1.5rem;
+}
+
+/* ---------- Addon Items Polish ---------- */
+.addon-item {
+    position: relative;
+    overflow: hidden;
+}
+
+.addon-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    transition: left 0.5s;
+}
+
+.addon-item:hover::before {
+    left: 100%;
+}
+
+.addon-item input:checked + .addon-icon {
+    animation: bounce 0.4s var(--bounce);
+}
+
+@keyframes bounce {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.3); }
+}
+
+/* ---------- Button Full Width Enhancement ---------- */
+.btn-full {
+    width: 100%;
+    justify-content: center;
+    font-size: 1rem;
+    padding: var(--space-md) var(--space-lg);
+}
+
+/* ---------- Modal Bio Text ---------- */
+.rabbit-detail-bio {
+    position: relative;
+    padding-left: var(--space-md);
+    border-left: 3px solid var(--lavender);
+    font-style: italic;
+}
+
+/* ---------- Scrollbar Styling for Modals ---------- */
+.modal-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.modal-content::-webkit-scrollbar-track {
+    background: var(--cream);
+    border-radius: 4px;
+}
+
+.modal-content::-webkit-scrollbar-thumb {
+    background: var(--lavender-deep);
+    border-radius: 4px;
+}
+
+.modal-content::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-purple);
+}
+
+/* ============================================
+   ENHANCED CART SIDEBAR
+   ============================================ */
+
+/* ---------- Cart Header Polish ---------- */
+.cart-header {
+    background: var(--gradient-sakura);
+    border-bottom: 3px solid var(--ink);
+    padding: var(--space-lg) var(--space-xl);
+}
+
+.cart-header-title {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.cart-header-icon {
+    font-size: 1.5rem;
+    animation: gentleBounce 2s infinite;
+}
+
+@keyframes gentleBounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-3px); }
+}
+
+.cart-header h3 {
+    font-family: 'Cherry Bomb One', cursive;
+    color: var(--ink);
+    margin: 0;
+}
+
+.cart-close {
+    width: 36px;
+    height: 36px;
+    background: var(--white);
+    border: 2px solid var(--ink);
+    border-radius: 50%;
+    font-size: 1.3rem;
+    box-shadow: 2px 2px 0 var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s var(--bounce);
+}
+
+.cart-close:hover {
+    background: var(--coral);
+    transform: rotate(90deg);
+}
+
+/* ---------- Cart Items ---------- */
+.cart-items {
+    background: var(--cream);
+}
+
+.cart-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    padding: var(--space-md);
+    background: var(--white);
+    border: 2px solid var(--ink);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-md);
+    box-shadow: 3px 3px 0 var(--ink);
+    animation: slideInRight 0.3s var(--smooth) backwards;
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.cart-item-visual {
+    width: 50px;
+    height: 50px;
+    border-radius: var(--radius-sm);
+    border: 2px solid var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.cart-item-snack {
+    background: var(--peach);
+    font-size: 1.5rem;
+}
+
+.cart-item-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.cart-item-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    flex-wrap: wrap;
+}
+
+.cart-item-name {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--ink);
+}
+
+.cart-item-signature {
+    font-size: 0.55rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 2px 6px;
+    background: var(--accent-purple);
+    color: var(--white);
+    border-radius: var(--radius-full);
+}
+
+.cart-item-price {
+    font-size: 0.85rem;
+    color: var(--accent-purple);
+    font-weight: 600;
+}
+
+.cart-item-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: var(--space-xs);
+}
+
+.cart-item-qty {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+}
+
+.qty-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 2px solid var(--ink);
+    background: var(--white);
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 700;
+    transition: all 0.2s var(--bounce);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.qty-btn:hover {
+    background: var(--lavender);
+    transform: scale(1.1);
+}
+
+.qty-btn:active {
+    transform: scale(0.95);
+}
+
+.qty-value {
+    min-width: 24px;
+    text-align: center;
+    font-weight: 700;
+    font-size: 1rem;
+}
+
+.cart-item-remove {
+    background: none;
+    border: none;
+    color: var(--text-light);
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 2px 6px;
+    border-radius: var(--radius-sm);
+    transition: all 0.2s;
+}
+
+.cart-item-remove:hover {
+    background: var(--coral);
+    color: var(--ink);
+}
+
+/* ---------- Cart Empty State ---------- */
+.cart-empty {
+    text-align: center;
+    padding: var(--space-3xl) var(--space-xl);
+    color: var(--text-medium);
+}
+
+.cart-empty-visual {
+    position: relative;
+    display: inline-block;
+    margin-bottom: var(--space-lg);
+}
+
+.cart-empty-icon {
+    font-size: 4rem;
+    display: block;
+    opacity: 0.4;
+}
+
+.cart-empty-bunny {
+    position: absolute;
+    bottom: -10px;
+    right: -15px;
+    font-size: 2rem;
+    animation: peekIn 2s infinite;
+}
+
+@keyframes peekIn {
+    0%, 100% { transform: translateX(0) rotate(0); }
+    25% { transform: translateX(-5px) rotate(-10deg); }
+    75% { transform: translateX(5px) rotate(10deg); }
+}
+
+.cart-empty h4 {
+    font-family: 'Cherry Bomb One', cursive;
+    color: var(--ink);
+    margin-bottom: var(--space-xs);
+}
+
+.cart-empty p {
+    margin-bottom: var(--space-lg);
+}
+
+/* ---------- Cart Summary ---------- */
+.cart-summary {
+    margin-bottom: var(--space-md);
+    padding-bottom: var(--space-md);
+    border-bottom: 2px dashed var(--lavender);
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-xs) 0;
+    font-size: 0.9rem;
+    color: var(--text-medium);
+}
+
+.summary-drinks,
+.summary-snacks {
+    font-size: 0.8rem;
+    color: var(--text-light);
+}
+
+.summary-stamps {
+    color: var(--accent-purple);
+    font-weight: 600;
+}
+
+.summary-total {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--ink);
+    padding-top: var(--space-sm);
+    margin-top: var(--space-xs);
+    border-top: 1px solid var(--lavender);
+}
+
+/* ---------- Cart Footer Polish ---------- */
+.cart-footer {
+    padding: var(--space-xl);
+    border-top: 3px solid var(--ink);
+    background: var(--white);
+}
+
+.cart-pickup {
+    margin-bottom: var(--space-lg);
+}
+
+.cart-pickup label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-dark);
+    margin-bottom: var(--space-xs);
+}
+
+.pickup-input {
+    width: 100%;
+    padding: var(--space-md);
+    border: 2px solid var(--ink);
+    border-radius: var(--radius-md);
+    font-family: inherit;
+    font-size: 0.9rem;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.pickup-input:focus {
+    outline: none;
+    border-color: var(--accent-purple);
+    box-shadow: 0 0 0 3px rgba(201, 160, 220, 0.2);
+}
+
+/* ---------- Checkout Button ---------- */
+#checkoutBtn {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1rem;
+    padding: var(--space-md) var(--space-lg);
+}
+
+.checkout-text {
+    font-weight: 600;
+}
+
+.checkout-total {
+    background: rgba(255,255,255,0.2);
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: var(--radius-sm);
+    font-weight: 700;
+}
+
+/* ---------- Cart Note ---------- */
+.cart-note {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-xs);
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--accent-purple);
+    font-weight: 600;
+    margin-top: var(--space-md);
+    padding: var(--space-sm);
+    background: var(--lavender);
+    border-radius: var(--radius-md);
+    border: 2px solid var(--ink);
+}
+
+.cart-note-icon {
+    animation: sparkle 1.5s infinite;
+}
+
+@keyframes sparkle {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.2); opacity: 0.8; }
+}
+
+/* ---------- Order Success Overlay ---------- */
+.cart-success {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--gradient-sakura);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s var(--smooth);
+    z-index: 10;
+}
+
+.cart-success.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.cart-success-content {
+    text-align: center;
+    animation: successPop 0.5s var(--bounce);
+}
+
+@keyframes successPop {
+    from {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.success-icon {
+    font-size: 5rem;
+    display: block;
+    margin-bottom: var(--space-lg);
+    animation: celebrateBounce 0.5s var(--bounce) infinite alternate;
+}
+
+@keyframes celebrateBounce {
+    from { transform: translateY(0) rotate(-5deg); }
+    to { transform: translateY(-10px) rotate(5deg); }
+}
+
+.cart-success h3 {
+    font-family: 'Cherry Bomb One', cursive;
+    font-size: 2rem;
+    color: var(--ink);
+    margin-bottom: var(--space-sm);
+}
+
+.success-stamps {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--accent-purple);
+    margin-bottom: var(--space-sm);
+}
+
+.success-message {
+    color: var(--text-medium);
+    font-size: 1rem;
+}
+
+/* ---------- Cart Sidebar Polish ---------- */
+.cart-sidebar {
+    border-left: 3px solid var(--ink);
+    box-shadow: -8px 0 30px rgba(0,0,0,0.15);
+}
+
+/* ---------- Responsive Cart ---------- */
+@media (max-width: 480px) {
+    .cart-item {
+        flex-wrap: wrap;
+    }
+
+    .cart-item-actions {
+        flex-direction: row;
+        width: 100%;
+        justify-content: space-between;
+        margin-top: var(--space-sm);
+        padding-top: var(--space-sm);
+        border-top: 1px dashed var(--lavender);
+    }
+
+    .cart-footer {
+        padding: var(--space-lg);
+    }
+
+    #checkoutBtn {
+        flex-direction: column;
+        gap: var(--space-xs);
+    }
+
+    .checkout-total {
+        width: 100%;
+        text-align: center;
     }
 }
