@@ -823,10 +823,11 @@ const BUN_TOYS = [
 const FRIENDSHIP_LEVELS = [
     { level: 0, name: 'Stranger', minPoints: 0, icon: '❓', perk: 'The bun eyes you suspiciously' },
     { level: 1, name: 'Acquaintance', minPoints: 10, icon: '👋', perk: 'The bun tolerates your presence' },
-    { level: 2, name: 'Friend', minPoints: 30, icon: '🤝', perk: 'The bun approaches you sometimes' },
-    { level: 3, name: 'Good Friend', minPoints: 60, icon: '💕', perk: 'The bun seeks you out for pets' },
-    { level: 4, name: 'Best Friend', minPoints: 100, icon: '💖', perk: 'The bun binkies when they see you' },
-    { level: 5, name: 'Soulmate', minPoints: 150, icon: '👑', perk: 'The bun has claimed you as their human' }
+    { level: 2, name: 'Friend', minPoints: 25, icon: '🤝', perk: 'The bun approaches you sometimes' },
+    { level: 3, name: 'Good Friend', minPoints: 50, icon: '💕', perk: 'The bun seeks you out for pets' },
+    { level: 4, name: 'Best Friend', minPoints: 85, icon: '💖', perk: 'The bun binkies when they see you' },
+    { level: 5, name: 'Soulmate', minPoints: 130, icon: '💝', perk: 'The bun has claimed you as their human' },
+    { level: 6, name: 'True Soulmate', minPoints: 200, icon: '👑', perk: 'An unbreakable bond across lifetimes' }
 ];
 
 const RARITY_CONFIG = {
@@ -835,6 +836,50 @@ const RARITY_CONFIG = {
     'very-rare': { label: 'Very Rare', color: '#9B59B6', bgColor: '#F3E5F5' },
     'legendary': { label: 'Legendary', color: '#D4AF37', bgColor: '#FFF8E7' }
 };
+
+// ============================================
+// MEGUMI CREDITS SYSTEM
+// Daily allowance for ordering and visiting
+// ============================================
+
+const MEGUMI_CREDITS = {
+    // Base daily allowance
+    baseCredits: 5,
+
+    // Bonus credits per friendship level reached with ANY bun
+    friendshipBonuses: {
+        'Acquaintance': 0,  // Level 1
+        'Friend': 1,        // Level 2
+        'Good Friend': 1,   // Level 3
+        'Best Friend': 2,   // Level 4
+        'Soulmate': 2,      // Level 5
+        'True Soulmate': 3  // Level 6
+    },
+
+    // Credit costs
+    costs: {
+        drink: 1,           // Per drink ordered
+        snack: 1,           // Per snack ordered
+        visit15: 2,         // 15-minute visit
+        visit30: 3,         // 30-minute visit
+        visit60: 5          // 60-minute visit
+    },
+
+    // Max credits possible (with all friendship bonuses)
+    maxCredits: 15
+};
+
+// Visit duration options with pricing
+const VISIT_OPTIONS = [
+    { id: 'visit15', duration: 15, label: '15 minutes', price: 8.00, credits: 2, friendshipPoints: 5 },
+    { id: 'visit30', duration: 30, label: '30 minutes', price: 14.00, credits: 3, friendshipPoints: 12 },
+    { id: 'visit60', duration: 60, label: '1 hour', price: 24.00, credits: 5, friendshipPoints: 25 }
+];
+
+// Helper to get visit option by duration
+function getVisitOption(duration) {
+    return VISIT_OPTIONS.find(v => v.duration === duration) || VISIT_OPTIONS[0];
+}
 
 // ============================================
 // REWARDS & SHOP
@@ -1125,7 +1170,16 @@ const ACHIEVEMENTS = [
         sticker: '💫',
         category: 'friendship',
         condition: { type: 'friendship_level', level: 'Soulmate' },
-        reward: { stamps: 30 }
+        reward: { stamps: 40 }
+    },
+    {
+        id: 'true_soulmate',
+        name: 'True Soulmate',
+        description: 'Reach "True Soulmate" status with any bun',
+        sticker: '👑',
+        category: 'friendship',
+        condition: { type: 'friendship_level', level: 'True Soulmate' },
+        reward: { stamps: 60 }
     },
     {
         id: 'social_butterfly',
@@ -1134,7 +1188,7 @@ const ACHIEVEMENTS = [
         sticker: '🦋',
         category: 'friendship',
         condition: { type: 'friends_count', count: 5, level: 'Friend' },
-        reward: { stamps: 20 }
+        reward: { stamps: 15 }
     },
     {
         id: 'everyones_friend',
@@ -1143,6 +1197,24 @@ const ACHIEVEMENTS = [
         sticker: '🌈',
         category: 'friendship',
         condition: { type: 'friends_count', count: 13, level: 'Friend' },
+        reward: { stamps: 30 }
+    },
+    {
+        id: 'best_friend_trio',
+        name: 'Inner Circle',
+        description: 'Reach "Best Friend" status with 3 different buns',
+        sticker: '💕',
+        category: 'friendship',
+        condition: { type: 'friends_count', count: 3, level: 'Best Friend' },
+        reward: { stamps: 25 }
+    },
+    {
+        id: 'soulmate_trio',
+        name: 'Soulmate Collection',
+        description: 'Reach "Soulmate" status with 3 different buns',
+        sticker: '💝',
+        category: 'friendship',
+        condition: { type: 'friends_count', count: 3, level: 'Soulmate' },
         reward: { stamps: 50 }
     },
 

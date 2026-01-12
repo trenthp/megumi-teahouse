@@ -5,30 +5,30 @@
 
 /* ---------- CSS Variables ---------- */
 :root {
-    /* Core Palette */
-    --pink: #FFD9F3;
-    --pink-deep: #FFB8E8;
-    --pink-light: #FFF0F9;
-    --lavender: #F4D9FF;
-    --lavender-deep: #E8B8FF;
-    --peach: #FFE8D9;
-    --peach-deep: #FFD4B8;
+    /* Core Palette - Softer, more ethereal tones matching splash_bg images */
+    --pink: #FFEEF6;
+    --pink-deep: #FFD9EC;
+    --pink-light: #FFF5F9;
+    --lavender: #F5EAFF;
+    --lavender-deep: #EAD9F7;
+    --peach: #FFF2E8;
+    --peach-deep: #FFE4D4;
     --white: #FFFFFF;
-    --cream: #FFF9F5;
+    --cream: #FFFBF7;
 
     /* Extended Palette */
-    --sky: #D9F0FF;
-    --sky-deep: #B8E0FF;
-    --mint: #D9FFE8;
-    --mint-deep: #B8FFD4;
-    --lilac: #E8D9FF;
-    --coral: #FFD9D9;
+    --sky: #EAF4FF;
+    --sky-deep: #D4EAFF;
+    --mint: #E8FFF0;
+    --mint-deep: #D4FFE4;
+    --lilac: #F0E8FF;
+    --coral: #FFEAE8;
 
     /* Accent Colors */
-    --accent-purple: #C9A0DC;
-    --accent-pink: #E891B8;
-    --accent-blue: #91C8E8;
-    --primary: #FF6B8A;
+    --accent-purple: #D4B8E8;
+    --accent-pink: #F0A8C8;
+    --accent-blue: #A8D4F0;
+    --primary: #FF7B9A;
 
     /* Gritty Accent Colors */
     --ink: #2D2438;
@@ -38,27 +38,33 @@
     /* Text Colors */
     --text-dark: #2D2438;
     --text-medium: #5A4B6D;
-    --text-light: #8A7B9B;
+    --text-light: #9088A0;
 
-    /* Gradients */
-    --gradient-sakura: linear-gradient(135deg, #FFD9F3 0%, #F4D9FF 50%, #D9F0FF 100%);
-    --gradient-sunset: linear-gradient(135deg, #FFE8D9 0%, #FFD9F3 50%, #F4D9FF 100%);
-    --gradient-ocean: linear-gradient(135deg, #D9F0FF 0%, #D9FFE8 50%, #F4D9FF 100%);
-    --gradient-berry: linear-gradient(135deg, #F4D9FF 0%, #FFD9F3 50%, #FFD9D9 100%);
-    --gradient-dream: linear-gradient(180deg, #FFF0F9 0%, #F4D9FF 100%);
+    /* Gradients - Softer, matching splash_bg style */
+    --gradient-sakura: linear-gradient(135deg, #FFEEF6 0%, #F5EAFF 50%, #EAF4FF 100%);
+    --gradient-sunset: linear-gradient(135deg, #FFF2E8 0%, #FFEEF6 50%, #F5EAFF 100%);
+    --gradient-ocean: linear-gradient(135deg, #EAF4FF 0%, #E8FFF0 50%, #F5EAFF 100%);
+    --gradient-berry: linear-gradient(135deg, #F5EAFF 0%, #FFEEF6 50%, #FFEAE8 100%);
+    --gradient-dream: linear-gradient(180deg, #FFF5F9 0%, #F5EAFF 100%);
 
-    /* Drink Gradients */
-    --drink-taro: linear-gradient(180deg, #E8B8FF 0%, #F4D9FF 50%, #FFD9F3 100%);
-    --drink-strawberry: linear-gradient(180deg, #FFB8E8 0%, #FFD9F3 50%, #FFF0F9 100%);
-    --drink-matcha: linear-gradient(180deg, #B8FFD4 0%, #D9FFE8 50%, #FFF9F5 100%);
-    --drink-mango: linear-gradient(180deg, #FFD4B8 0%, #FFE8D9 50%, #FFF9F5 100%);
-    --drink-blueberry: linear-gradient(180deg, #B8E0FF 0%, #D9F0FF 50%, #F4D9FF 100%);
-    --drink-lavender: linear-gradient(180deg, #C9A0DC 0%, #E8D9FF 50%, #FFF0F9 100%);
+    /* Background gradients matching splash_bg images */
+    --gradient-splash-1: linear-gradient(180deg, #FFEEF6 0%, #F5EAFF 40%, #FFF2E8 100%);
+    --gradient-splash-2: linear-gradient(180deg, #F0E8FF 0%, #FFFBF7 60%, #FFE4D4 100%);
+    --gradient-splash-3: linear-gradient(180deg, #FFEEF6 0%, #EAF4FF 60%, #FFF2E8 100%);
 
-    /* Shadows */
-    --shadow-soft: 0 4px 20px rgba(201, 160, 220, 0.15);
-    --shadow-medium: 0 8px 30px rgba(201, 160, 220, 0.2);
-    --shadow-bounce: 0 10px 40px rgba(201, 160, 220, 0.25);
+    /* Drink Gradients - Softer versions */
+    --drink-taro: linear-gradient(180deg, #EAD9F7 0%, #F5EAFF 50%, #FFEEF6 100%);
+    --drink-strawberry: linear-gradient(180deg, #FFD9EC 0%, #FFEEF6 50%, #FFF5F9 100%);
+    --drink-matcha: linear-gradient(180deg, #D4FFE4 0%, #E8FFF0 50%, #FFFBF7 100%);
+    --drink-mango: linear-gradient(180deg, #FFE4D4 0%, #FFF2E8 50%, #FFFBF7 100%);
+    --drink-blueberry: linear-gradient(180deg, #D4EAFF 0%, #EAF4FF 50%, #F5EAFF 100%);
+    --drink-lavender: linear-gradient(180deg, #D4B8E8 0%, #F0E8FF 50%, #FFF5F9 100%);
+
+    /* Shadows - Softer, warmer tones instead of heavy purple */
+    --shadow-soft: 0 4px 20px rgba(180, 160, 190, 0.12);
+    --shadow-medium: 0 8px 30px rgba(180, 160, 190, 0.16);
+    --shadow-bounce: 0 10px 40px rgba(180, 160, 190, 0.20);
+    --shadow-card: 0 2px 12px rgba(180, 160, 190, 0.10);
 
     /* Animation */
     --bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
@@ -107,7 +113,7 @@ body.no-scroll {
     overflow: hidden;
 }
 
-/* Noise/Grain Texture Overlay */
+/* Subtle Sparkle/Grain Texture Overlay - matches splash_bg style */
 body::before {
     content: '';
     position: fixed;
@@ -117,13 +123,94 @@ body::before {
     height: 100%;
     pointer-events: none;
     z-index: 1000;
-    opacity: 0.03;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    opacity: 0.04;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='sparkle'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' seed='15' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23sparkle)'/%3E%3C/svg%3E");
+    mix-blend-mode: overlay;
 }
 
 /* Japanese Text */
 .jp, [class*="-jp"] {
     font-family: 'Zen Maru Gothic', sans-serif;
+}
+
+/* ---------- Accessibility ---------- */
+
+/* Focus ring for keyboard navigation */
+:focus-visible {
+    outline: 3px solid var(--accent-pink);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+}
+
+/* Remove focus ring for mouse users */
+:focus:not(:focus-visible) {
+    outline: none;
+}
+
+/* Enhanced focus for buttons */
+.btn:focus-visible,
+.nav-link:focus-visible,
+.cart-btn:focus-visible {
+    outline: 3px solid var(--accent-pink);
+    outline-offset: 3px;
+    box-shadow: 0 0 0 6px rgba(240, 168, 200, 0.25);
+}
+
+/* Focus for cards and clickable items */
+.drink-card:focus-visible,
+.rabbit-card:focus-visible,
+.achievement-card:focus-visible,
+.shop-item:focus-visible,
+.history-tab:focus-visible,
+.leaderboard-filter:focus-visible {
+    outline: 3px solid var(--accent-pink);
+    outline-offset: 2px;
+}
+
+/* Skip to content link for screen readers */
+.skip-link {
+    position: absolute;
+    top: -100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--ink);
+    color: var(--white);
+    padding: var(--space-md) var(--space-lg);
+    border-radius: var(--radius-md);
+    z-index: 10000;
+    transition: top 0.2s ease;
+}
+
+.skip-link:focus {
+    top: var(--space-md);
+}
+
+/* Screen reader only content */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+
+    .boba-particle {
+        animation: none;
+    }
 }
 
 /* ---------- Boba Particles Background ---------- */
@@ -282,6 +369,43 @@ h3 { font-size: clamp(1.25rem, 3vw, 1.75rem); }
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+/* Credits Indicator */
+.credits-indicator {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 12px;
+    background: var(--lavender);
+    border-radius: var(--radius-full);
+    margin-right: var(--space-sm);
+    cursor: default;
+    transition: all 0.3s var(--smooth);
+}
+
+.credits-indicator:hover {
+    background: var(--lavender-deep);
+}
+
+.credits-sparkle {
+    font-size: 0.9rem;
+}
+
+.credits-count {
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--ink);
+}
+
+.credits-indicator.low-credits {
+    background: var(--coral);
+    animation: pulseCredits 2s infinite;
+}
+
+@keyframes pulseCredits {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
 }
 
 /* Mobile Nav Toggle */
@@ -820,6 +944,15 @@ h3 { font-size: clamp(1.25rem, 3vw, 1.75rem); }
     font-size: 1.25rem;
     font-weight: 600;
     color: var(--accent-purple);
+}
+
+.drink-credits,
+.snack-credits {
+    font-size: 0.75rem;
+    color: var(--text-medium);
+    background: var(--lavender);
+    padding: 2px 6px;
+    border-radius: var(--radius-full);
 }
 
 .drink-add {
@@ -4405,6 +4538,18 @@ h3 { font-size: clamp(1.25rem, 3vw, 1.75rem); }
     50% { box-shadow: 4px 4px 0 var(--ink), 0 0 8px var(--accent-purple); }
 }
 
+.bun-match-hint {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-sm) var(--space-md);
+    background: var(--lavender);
+    border-radius: var(--radius-sm);
+    font-size: 0.8rem;
+    color: var(--text-medium);
+    margin-top: var(--space-sm);
+}
+
 /* ---------- Responsive Drink Cross-sell ---------- */
 @media (max-width: 400px) {
     .bun-match-content {
@@ -4866,6 +5011,204 @@ h3 { font-size: clamp(1.25rem, 3vw, 1.75rem); }
     padding-top: var(--space-sm);
     margin-top: var(--space-xs);
     border-top: 1px solid var(--lavender);
+}
+
+.summary-visits {
+    font-size: 0.8rem;
+    color: var(--text-light);
+}
+
+/* ---------- Megumi Credits Banner ---------- */
+.cart-credits-banner {
+    background: var(--gradient-sakura);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    margin-bottom: var(--space-md);
+    border: 2px solid var(--lavender-deep);
+}
+
+.cart-credits-banner.has-credits {
+    border-color: var(--mint-deep);
+}
+
+.cart-credits-banner.no-credits {
+    border-color: var(--coral);
+    background: linear-gradient(135deg, var(--coral) 0%, var(--peach) 100%);
+}
+
+.credits-display {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-sm);
+}
+
+.credits-label {
+    font-family: 'Cherry Bomb One', cursive;
+    font-size: 0.9rem;
+    color: var(--ink);
+}
+
+.credits-value {
+    font-weight: 600;
+    color: var(--accent-purple);
+    font-size: 0.9rem;
+}
+
+.credits-cost {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    color: var(--text-medium);
+}
+
+.credits-amount {
+    font-weight: 600;
+    color: var(--ink);
+}
+
+.credits-amount.over-budget {
+    color: #c44;
+}
+
+.credits-warning {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    margin-top: var(--space-sm);
+    padding: var(--space-sm);
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: var(--radius-sm);
+    font-size: 0.8rem;
+    color: var(--ink);
+}
+
+/* ---------- Cart Section Labels ---------- */
+.cart-section-label {
+    font-family: 'Cherry Bomb One', cursive;
+    font-size: 0.85rem;
+    color: var(--text-medium);
+    padding: var(--space-sm) 0;
+    margin-top: var(--space-sm);
+    border-bottom: 1px dashed var(--lavender);
+}
+
+.cart-section-label:first-child {
+    margin-top: 0;
+}
+
+/* ---------- Cart Item Credits ---------- */
+.cart-item-credits {
+    font-size: 0.75rem;
+    color: var(--accent-purple);
+    margin-left: var(--space-sm);
+}
+
+.cart-item-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    margin-top: 2px;
+}
+
+/* ---------- Cart Item Badge ---------- */
+.cart-item-badge {
+    font-size: 0.65rem;
+    padding: 2px 6px;
+    border-radius: var(--radius-full);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.cart-item-badge.signature {
+    background: var(--lavender-deep);
+    color: var(--ink);
+}
+
+.cart-item-badge.visit {
+    background: var(--mint-deep);
+    color: var(--ink);
+}
+
+/* ---------- Cart Visit Items ---------- */
+.cart-item-visit {
+    background: var(--gradient-ocean);
+}
+
+.cart-item-bun {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.cart-item-bun img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.cart-item-extras {
+    display: flex;
+    gap: 4px;
+    margin-top: 4px;
+    flex-wrap: wrap;
+}
+
+.extra-tag {
+    font-size: 0.8rem;
+    padding: 2px 4px;
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: var(--radius-sm);
+}
+
+/* ---------- Cart Empty Actions ---------- */
+.cart-empty-actions {
+    display: flex;
+    gap: var(--space-sm);
+    justify-content: center;
+    margin-bottom: var(--space-lg);
+}
+
+.cart-credits-info {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-xs);
+    font-size: 0.85rem;
+    color: var(--accent-purple);
+    padding: var(--space-sm);
+    background: var(--lavender);
+    border-radius: var(--radius-full);
+}
+
+.credits-icon {
+    font-size: 1rem;
+}
+
+/* ---------- Stamps Preview Credits Row ---------- */
+.stamps-row {
+    font-size: 0.85rem;
+}
+
+.credits-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.8rem;
+    color: var(--accent-purple);
+    margin-top: 2px;
+}
+
+.credits-row.insufficient {
+    color: #c44;
 }
 
 /* ---------- Cart Footer Polish ---------- */

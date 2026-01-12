@@ -6,16 +6,36 @@
 // ============================================
 // STATE MANAGEMENT
 // ============================================
+
+// State version for migrations
+const STATE_VERSION = 2;
+
 const state = {
-    cart: [],
+    version: STATE_VERSION,
+    cart: [],  // Unified cart: drinks, snacks, AND visits
     stamps: 0,
     drinksOrdered: 0,
     snacksOrdered: 0,
     rabbitVisits: 0,
     lastCheckin: null,
+    lastCheckinDate: null, // ISO date string for reliable comparison
     checkedInToday: false,
+    currentStreak: 0,
+    longestStreak: 0,
     unlockedRewards: [],
     currentPage: 'home',
+    // Megumi Credits system
+    megumiCredits: {
+        available: 5,           // Current available credits
+        lastRefreshDate: null,  // Date string of last refresh
+        bonusCredits: 0         // Friendship bonus credits
+    },
+    // UI state (persisted tab selections)
+    uiState: {
+        leaderboardPeriod: 'all',
+        historyTab: 'orders',
+        achievementCategory: 'all'
+    },
     // Friendship tracking per rabbit
     friendships: {},
     // Total spent on each rabbit (for leaderboard)
@@ -33,10 +53,11 @@ const state = {
     userName: '',
     userAvatar: '🐰',
     memberSince: null,
-    // Order history
+    // Order history (drinks/snacks only)
     orderHistory: [],
     visitHistory: [],
-    // Shop purchases
+    // Shop purchases (separate from order history)
+    shopRedemptions: [],
     purchasedItems: []
 };
 
@@ -55,6 +76,120 @@ function initFriendships() {
             state.rabbitSpending[rabbit.id] = 0;
         }
     });
+}
+
+// ============================================
+// MEGUMI CREDITS SYSTEM
+// ============================================
+
+// Calculate bonus credits from friendship levels
+function calculateFriendshipBonusCredits() {
+    let bonus = 0;
+    const bonuses = MEGUMI_CREDITS.friendshipBonuses;
+
+    // Check each rabbit's friendship level
+    RABBITS.forEach(rabbit => {
+        const level = getFriendshipLevelForRabbit(rabbit.id);
+        if (bonuses[level.name]) {
+            bonus += bonuses[level.name];
+        }
+    });
+
+    return Math.min(bonus, MEGUMI_CREDITS.maxCredits - MEGUMI_CREDITS.baseCredits);
+}
+
+// Refresh credits at midnight (call on load and periodically)
+function refreshMegumiCredits() {
+    const today = new Date().toISOString().split('T')[0];
+
+    // Check if we need to refresh (new day)
+    if (state.megumiCredits.lastRefreshDate !== today) {
+        const bonusCredits = calculateFriendshipBonusCredits();
+        const totalCredits = MEGUMI_CREDITS.baseCredits + bonusCredits;
+
+        state.megumiCredits = {
+            available: totalCredits,
+            lastRefreshDate: today,
+            bonusCredits: bonusCredits
+        };
+
+        saveState();
+
+        // Notify user if they're returning
+        if (state.megumiCredits.lastRefreshDate !== null) {
+            showToast(`Daily credits refreshed! ${totalCredits} Megumi Credits available.`, '✨');
+        }
+    }
+
+    // Always update the display
+    updateCreditsDisplay();
+}
+
+// Get total credits available today
+function getTotalCreditsToday() {
+    return MEGUMI_CREDITS.baseCredits + state.megumiCredits.bonusCredits;
+}
+
+// Get credits remaining
+function getCreditsRemaining() {
+    return state.megumiCredits.available;
+}
+
+// Calculate credit cost for current cart
+function calculateCartCreditCost() {
+    let cost = 0;
+    state.cart.forEach(item => {
+        if (item.type === 'visit') {
+            const visitOption = getVisitOption(item.duration);
+            cost += visitOption.credits;
+        } else if (item.type === 'drink' || !item.type) {
+            cost += MEGUMI_CREDITS.costs.drink * (item.quantity || 1);
+        } else if (item.type === 'snack') {
+            cost += MEGUMI_CREDITS.costs.snack * (item.quantity || 1);
+        }
+    });
+    return cost;
+}
+
+// Check if user has enough credits for cart
+function hasEnoughCredits() {
+    return getCreditsRemaining() >= calculateCartCreditCost();
+}
+
+// Spend credits (call after successful checkout)
+function spendCredits(amount) {
+    state.megumiCredits.available = Math.max(0, state.megumiCredits.available - amount);
+    saveState();
+    updateCreditsDisplay();
+}
+
+// Update the credits display in the header
+function updateCreditsDisplay() {
+    const creditsCount = document.getElementById('creditsCount');
+    const creditsIndicator = document.getElementById('creditsIndicator');
+
+    if (creditsCount && creditsIndicator) {
+        const available = getCreditsRemaining();
+        creditsCount.textContent = available;
+
+        // Add low-credits class when 2 or fewer credits remaining
+        if (available <= 2) {
+            creditsIndicator.classList.add('low-credits');
+        } else {
+            creditsIndicator.classList.remove('low-credits');
+        }
+    }
+}
+
+// Get credit cost for a single item
+function getItemCreditCost(item) {
+    if (item.type === 'visit') {
+        const visitOption = getVisitOption(item.duration);
+        return visitOption.credits;
+    } else if (item.type === 'snack' || item.isSnack) {
+        return MEGUMI_CREDITS.costs.snack;
+    }
+    return MEGUMI_CREDITS.costs.drink;
 }
 
 // Get friendship level for a rabbit (uses helper from data.js if available)
@@ -321,23 +456,167 @@ function getAchievementProgress(achievement) {
 
 // Load state from localStorage
 function loadState() {
-    const saved = localStorage.getItem('megumi-usagi-state');
-    if (saved) {
-        const parsed = JSON.parse(saved);
-        Object.assign(state, parsed);
+    try {
+        const saved = localStorage.getItem('megumi-usagi-state');
+        if (saved) {
+            const parsed = JSON.parse(saved);
 
-        // Check if last checkin was today
-        if (state.lastCheckin) {
-            const lastDate = new Date(state.lastCheckin).toDateString();
-            const today = new Date().toDateString();
-            state.checkedInToday = lastDate === today;
+            // Validate basic structure
+            if (!validateStateStructure(parsed)) {
+                console.warn('Invalid state structure detected, using defaults');
+                return;
+            }
+
+            // Migrate old state versions if needed
+            const migrated = migrateState(parsed);
+
+            // Merge with current state (preserves new properties)
+            Object.assign(state, migrated);
+
+            // Ensure uiState exists (for old saves)
+            if (!state.uiState) {
+                state.uiState = {
+                    leaderboardPeriod: 'all',
+                    historyTab: 'orders',
+                    achievementCategory: 'all'
+                };
+            }
+
+            // Check if last checkin was today (use date string for reliability)
+            if (state.lastCheckinDate) {
+                const today = new Date().toISOString().split('T')[0];
+                state.checkedInToday = state.lastCheckinDate === today;
+            } else if (state.lastCheckin) {
+                // Fallback for old format
+                const lastDate = new Date(state.lastCheckin).toDateString();
+                const today = new Date().toDateString();
+                state.checkedInToday = lastDate === today;
+            }
+
+            // Clean up orphaned data
+            cleanupOrphanedData();
+
+            // Refresh Megumi Credits (handles midnight reset)
+            refreshMegumiCredits();
+        }
+    } catch (error) {
+        console.error('Failed to load state from localStorage:', error);
+        // State remains at defaults
+    }
+}
+
+// Validate that saved state has expected structure
+function validateStateStructure(parsed) {
+    if (typeof parsed !== 'object' || parsed === null) return false;
+
+    // Check essential properties exist and have correct types
+    const checks = [
+        typeof parsed.stamps === 'undefined' || typeof parsed.stamps === 'number',
+        typeof parsed.cart === 'undefined' || Array.isArray(parsed.cart),
+        typeof parsed.friendships === 'undefined' || typeof parsed.friendships === 'object',
+        typeof parsed.orderHistory === 'undefined' || Array.isArray(parsed.orderHistory)
+    ];
+
+    return checks.every(check => check);
+}
+
+// Migrate old state versions to current format
+function migrateState(parsed) {
+    const version = parsed.version || 0;
+
+    // Version 0 -> 1: Add uiState, streaks, shopRedemptions, separate shop orders
+    if (version < 1) {
+        parsed.version = 1;
+        parsed.uiState = parsed.uiState || {
+            leaderboardPeriod: 'all',
+            historyTab: 'orders',
+            achievementCategory: 'all'
+        };
+        parsed.currentStreak = parsed.currentStreak || 0;
+        parsed.longestStreak = parsed.longestStreak || 0;
+        parsed.lastCheckinDate = parsed.lastCheckinDate || null;
+
+        // Migrate shop orders from orderHistory to shopRedemptions
+        parsed.shopRedemptions = parsed.shopRedemptions || [];
+        if (Array.isArray(parsed.orderHistory)) {
+            const shopOrders = parsed.orderHistory.filter(order => order.type === 'shop');
+            const drinkOrders = parsed.orderHistory.filter(order => order.type !== 'shop');
+
+            // Move shop orders to shopRedemptions
+            shopOrders.forEach(order => {
+                parsed.shopRedemptions.push({
+                    id: order.id,
+                    date: order.date,
+                    itemId: order.itemId,
+                    itemName: order.itemName,
+                    itemIcon: order.itemIcon,
+                    stampsCost: order.stampsCost
+                });
+            });
+
+            // Keep only drink orders in orderHistory
+            parsed.orderHistory = drinkOrders;
         }
     }
+
+    // Version 1 -> 2: Add Megumi Credits system
+    if (version < 2) {
+        parsed.version = 2;
+        parsed.megumiCredits = parsed.megumiCredits || {
+            available: MEGUMI_CREDITS.baseCredits,
+            lastRefreshDate: null,
+            bonusCredits: 0
+        };
+
+        // Add type to existing cart items (drinks)
+        if (Array.isArray(parsed.cart)) {
+            parsed.cart = parsed.cart.map(item => ({
+                ...item,
+                type: item.type || (item.isSnack ? 'snack' : 'drink')
+            }));
+        }
+    }
+
+    // Future migrations go here
+    // if (version < 3) { ... }
+
+    return parsed;
+}
+
+// Remove data for rabbits that no longer exist
+function cleanupOrphanedData() {
+    const validRabbitIds = new Set(RABBITS.map(r => r.id));
+
+    // Clean friendships
+    Object.keys(state.friendships).forEach(id => {
+        if (!validRabbitIds.has(id)) {
+            delete state.friendships[id];
+        }
+    });
+
+    // Clean rabbitSpending
+    Object.keys(state.rabbitSpending).forEach(id => {
+        if (!validRabbitIds.has(id)) {
+            delete state.rabbitSpending[id];
+        }
+    });
+
+    // Clean uniqueBunsVisited
+    state.uniqueBunsVisited = state.uniqueBunsVisited.filter(id => validRabbitIds.has(id));
 }
 
 // Save state to localStorage
 function saveState() {
-    localStorage.setItem('megumi-usagi-state', JSON.stringify(state));
+    try {
+        state.version = STATE_VERSION;
+        localStorage.setItem('megumi-usagi-state', JSON.stringify(state));
+    } catch (error) {
+        console.error('Failed to save state to localStorage:', error);
+        // Could be quota exceeded - notify user
+        if (error.name === 'QuotaExceededError') {
+            showToast('Storage full! Some data may not be saved.', '⚠️');
+        }
+    }
 }
 
 // ============================================
@@ -436,6 +715,67 @@ function forceUnlockScroll() {
 }
 
 // ============================================
+// FOCUS TRAP (Accessibility)
+// ============================================
+let focusTrapElement = null;
+let previouslyFocusedElement = null;
+
+function trapFocus(element) {
+    previouslyFocusedElement = document.activeElement;
+    focusTrapElement = element;
+
+    const focusableElements = element.querySelectorAll(
+        'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    );
+
+    if (focusableElements.length === 0) return;
+
+    const firstElement = focusableElements[0];
+    const lastElement = focusableElements[focusableElements.length - 1];
+
+    // Focus first element
+    firstElement.focus();
+
+    // Handle tab key
+    element.addEventListener('keydown', handleFocusTrap);
+
+    function handleFocusTrap(e) {
+        if (e.key !== 'Tab') return;
+
+        if (e.shiftKey) {
+            // Shift + Tab
+            if (document.activeElement === firstElement) {
+                e.preventDefault();
+                lastElement.focus();
+            }
+        } else {
+            // Tab
+            if (document.activeElement === lastElement) {
+                e.preventDefault();
+                firstElement.focus();
+            }
+        }
+    }
+
+    // Store handler for removal
+    element._focusTrapHandler = handleFocusTrap;
+}
+
+function releaseFocus() {
+    if (focusTrapElement && focusTrapElement._focusTrapHandler) {
+        focusTrapElement.removeEventListener('keydown', focusTrapElement._focusTrapHandler);
+        delete focusTrapElement._focusTrapHandler;
+    }
+
+    if (previouslyFocusedElement && previouslyFocusedElement.focus) {
+        previouslyFocusedElement.focus();
+    }
+
+    focusTrapElement = null;
+    previouslyFocusedElement = null;
+}
+
+// ============================================
 // MENU / DRINKS & SNACKS
 // ============================================
 function initMenu() {
@@ -471,6 +811,7 @@ function initMenu() {
                         <p class="drink-desc">${drink.description}</p>
                         <div class="drink-footer">
                             <span class="drink-price">$${drink.price.toFixed(2)}</span>
+                            <span class="drink-credits">${MEGUMI_CREDITS.costs.drink}✨</span>
                             <button class="drink-add" data-add-drink="${drink.id}">+</button>
                         </div>
                     </div>
@@ -514,6 +855,7 @@ function initMenu() {
                         <p class="snack-desc">${snack.description}</p>
                         <div class="snack-footer">
                             <span class="snack-price">$${snack.price.toFixed(2)}</span>
+                            <span class="snack-credits">${MEGUMI_CREDITS.costs.snack}✨</span>
                             <button class="snack-add" onclick="addSnackToCart('${snack.id}')">+</button>
                         </div>
                     </div>
@@ -637,9 +979,10 @@ function openDrinkModal(drinkId) {
                         </div>
                     </div>
                 </div>
-                <button class="btn btn-secondary btn-full bun-match-cta" onclick="openScheduleFromDrink('${matchingRabbit.id}')">
-                    Book Time with ${matchingRabbit.name}
-                </button>
+                <div class="bun-match-hint">
+                    <span>🐰</span>
+                    <span>Visit ${matchingRabbit.name} from the Buns page!</span>
+                </div>
             </div>
         `;
     }
@@ -783,18 +1126,62 @@ function renderCart() {
     const checkoutTotal = document.getElementById('checkoutTotal');
     const stampsPreview = document.getElementById('stampsPreview');
 
-    const totalItems = state.cart.reduce((sum, item) => sum + item.quantity, 0);
-    const totalPrice = state.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    const drinksCount = state.cart.filter(item => !item.isSnack).reduce((sum, item) => sum + item.quantity, 0);
-    const snacksCount = state.cart.filter(item => item.isSnack).reduce((sum, item) => sum + item.quantity, 0);
+    // Separate items by type
+    const drinks = state.cart.filter(item => item.type === 'drink' || (!item.type && !item.isSnack));
+    const snacks = state.cart.filter(item => item.type === 'snack' || item.isSnack);
+    const visits = state.cart.filter(item => item.type === 'visit');
+
+    // Calculate totals
+    const totalItems = drinks.reduce((sum, item) => sum + (item.quantity || 1), 0)
+        + snacks.reduce((sum, item) => sum + (item.quantity || 1), 0)
+        + visits.length;
+
+    const totalPrice = state.cart.reduce((sum, item) => {
+        if (item.type === 'visit') return sum + item.price;
+        return sum + (item.price * (item.quantity || 1));
+    }, 0);
+
+    const drinksCount = drinks.reduce((sum, item) => sum + (item.quantity || 1), 0);
+    const snacksCount = snacks.reduce((sum, item) => sum + (item.quantity || 1), 0);
+    const visitsCount = visits.length;
+
+    // Calculate credit costs
+    const creditCost = calculateCartCreditCost();
+    const creditsAvailable = getCreditsRemaining();
+    const hasCredits = creditsAvailable >= creditCost;
 
     cartCount.textContent = totalItems;
     checkoutTotal.textContent = `$${totalPrice.toFixed(2)}`;
-    stampsPreview.textContent = `+${drinksCount} stamp${drinksCount !== 1 ? 's' : ''} with this order!`;
 
-    // Render order summary
+    // Update stamps preview with credit info
+    const stampsEarned = drinksCount + (visitsCount * 2);
+    stampsPreview.innerHTML = `
+        <div class="stamps-row">+${stampsEarned} stamp${stampsEarned !== 1 ? 's' : ''}</div>
+        <div class="credits-row ${hasCredits ? '' : 'insufficient'}">
+            <span class="credits-icon">✨</span>
+            <span>${creditCost}/${creditsAvailable} credits</span>
+        </div>
+    `;
+
+    // Render order summary with credits
     if (totalItems > 0) {
         cartSummary.innerHTML = `
+            <div class="cart-credits-banner ${hasCredits ? 'has-credits' : 'no-credits'}">
+                <div class="credits-display">
+                    <span class="credits-label">Megumi Credits</span>
+                    <span class="credits-value">${creditsAvailable} available</span>
+                </div>
+                <div class="credits-cost">
+                    <span>This order:</span>
+                    <span class="credits-amount ${hasCredits ? '' : 'over-budget'}">${creditCost} credits</span>
+                </div>
+                ${!hasCredits ? `
+                    <div class="credits-warning">
+                        <span>⏰</span>
+                        <span>Not enough credits! Remove items or come back tomorrow.</span>
+                    </div>
+                ` : ''}
+            </div>
             <div class="summary-row">
                 <span>Subtotal (${totalItems} item${totalItems !== 1 ? 's' : ''})</span>
                 <span>$${totalPrice.toFixed(2)}</span>
@@ -808,6 +1195,12 @@ function renderCart() {
             ${snacksCount > 0 ? `
                 <div class="summary-row summary-snacks">
                     <span>🍡 ${snacksCount} snack${snacksCount !== 1 ? 's' : ''}</span>
+                </div>
+            ` : ''}
+            ${visitsCount > 0 ? `
+                <div class="summary-row summary-visits">
+                    <span>🐰 ${visitsCount} bun visit${visitsCount !== 1 ? 's' : ''}</span>
+                    <span class="summary-stamps">+${visitsCount * 2} stamps</span>
                 </div>
             ` : ''}
             <div class="summary-row summary-total">
@@ -828,44 +1221,174 @@ function renderCart() {
                 </div>
                 <h4>Your cart is empty</h4>
                 <p>Time to treat yourself!</p>
-                <button class="btn btn-secondary btn-small" onclick="navigateToMenu()">Browse Menu</button>
+                <div class="cart-empty-actions">
+                    <button class="btn btn-secondary btn-small" onclick="navigateToMenu()">Browse Menu</button>
+                    <button class="btn btn-secondary btn-small" onclick="navigateToRabbits()">Meet Buns</button>
+                </div>
+                <div class="cart-credits-info">
+                    <span class="credits-icon">✨</span>
+                    <span>${creditsAvailable} Megumi Credits available today</span>
+                </div>
             </div>
         `;
         return;
     }
 
-    cartItems.innerHTML = state.cart.map((item, index) => {
-        // Check if this is a signature item
-        const isSignature = item.rabbitId ? true : false;
-        const signatureBadge = isSignature ? `<span class="cart-item-signature">Signature</span>` : '';
+    // Render cart items grouped by type
+    let itemsHtml = '';
 
-        const visual = item.isSnack
-            ? `<div class="cart-item-visual cart-item-snack">${item.icon}</div>`
-            : `<div class="cart-item-visual" style="background: ${item.gradient}"></div>`;
+    // Drinks section
+    if (drinks.length > 0) {
+        itemsHtml += `<div class="cart-section-label">Drinks</div>`;
+        itemsHtml += drinks.map((item, index) => renderDrinkCartItem(item, index)).join('');
+    }
 
-        return `
-            <div class="cart-item" style="animation-delay: ${index * 0.05}s">
-                ${visual}
-                <div class="cart-item-info">
-                    <div class="cart-item-header">
-                        <span class="cart-item-name">${item.name}</span>
-                        ${signatureBadge}
-                    </div>
-                    <div class="cart-item-price">$${(item.price * item.quantity).toFixed(2)}</div>
+    // Snacks section
+    if (snacks.length > 0) {
+        itemsHtml += `<div class="cart-section-label">Snacks</div>`;
+        itemsHtml += snacks.map((item, index) => renderSnackCartItem(item, index + drinks.length)).join('');
+    }
+
+    // Visits section
+    if (visits.length > 0) {
+        itemsHtml += `<div class="cart-section-label">Bun Visits</div>`;
+        itemsHtml += visits.map((item, index) => renderVisitCartItem(item, index + drinks.length + snacks.length)).join('');
+    }
+
+    cartItems.innerHTML = itemsHtml;
+}
+
+// Render a drink item in the cart
+function renderDrinkCartItem(item, index) {
+    const isSignature = item.rabbitId ? true : false;
+    const signatureBadge = isSignature ? `<span class="cart-item-badge signature">Signature</span>` : '';
+    const creditCost = MEGUMI_CREDITS.costs.drink * (item.quantity || 1);
+
+    return `
+        <div class="cart-item" style="animation-delay: ${index * 0.05}s">
+            <div class="cart-item-visual" style="background: ${item.gradient || 'var(--gradient-sakura)'}"></div>
+            <div class="cart-item-info">
+                <div class="cart-item-header">
+                    <span class="cart-item-name">${item.name}</span>
+                    ${signatureBadge}
                 </div>
-                <div class="cart-item-actions">
-                    <div class="cart-item-qty">
-                        <button class="qty-btn" onclick="updateCartQuantity('${item.id}', -1)">-</button>
-                        <span class="qty-value">${item.quantity}</span>
-                        <button class="qty-btn" onclick="updateCartQuantity('${item.id}', 1)">+</button>
-                    </div>
-                    <button class="cart-item-remove" onclick="removeFromCart('${item.id}')" title="Remove">
-                        <span>×</span>
-                    </button>
+                <div class="cart-item-meta">
+                    <span class="cart-item-price">$${(item.price * (item.quantity || 1)).toFixed(2)}</span>
+                    <span class="cart-item-credits">${creditCost}✨</span>
                 </div>
             </div>
-        `;
-    }).join('');
+            <div class="cart-item-actions">
+                <div class="cart-item-qty">
+                    <button class="qty-btn" onclick="updateCartQuantity('${item.id}', -1)">-</button>
+                    <span class="qty-value">${item.quantity || 1}</span>
+                    <button class="qty-btn" onclick="updateCartQuantity('${item.id}', 1)">+</button>
+                </div>
+                <button class="cart-item-remove" onclick="removeFromCart('${item.id}')" aria-label="Remove ${item.name}">×</button>
+            </div>
+        </div>
+    `;
+}
+
+// Render a snack item in the cart
+function renderSnackCartItem(item, index) {
+    const creditCost = MEGUMI_CREDITS.costs.snack * (item.quantity || 1);
+
+    return `
+        <div class="cart-item" style="animation-delay: ${index * 0.05}s">
+            <div class="cart-item-visual cart-item-snack">${item.icon || '🍡'}</div>
+            <div class="cart-item-info">
+                <div class="cart-item-header">
+                    <span class="cart-item-name">${item.name}</span>
+                </div>
+                <div class="cart-item-meta">
+                    <span class="cart-item-price">$${(item.price * (item.quantity || 1)).toFixed(2)}</span>
+                    <span class="cart-item-credits">${creditCost}✨</span>
+                </div>
+            </div>
+            <div class="cart-item-actions">
+                <div class="cart-item-qty">
+                    <button class="qty-btn" onclick="updateCartQuantity('${item.id}', -1)">-</button>
+                    <span class="qty-value">${item.quantity || 1}</span>
+                    <button class="qty-btn" onclick="updateCartQuantity('${item.id}', 1)">+</button>
+                </div>
+                <button class="cart-item-remove" onclick="removeFromCart('${item.id}')" aria-label="Remove ${item.name}">×</button>
+            </div>
+        </div>
+    `;
+}
+
+// Render a visit item in the cart
+function renderVisitCartItem(item, index) {
+    const rabbit = RABBITS.find(r => r.id === item.rabbitId);
+    const visitOption = getVisitOption(item.duration);
+
+    return `
+        <div class="cart-item cart-item-visit" style="animation-delay: ${index * 0.05}s">
+            <div class="cart-item-visual cart-item-bun">
+                ${rabbit?.image ? `<img src="${rabbit.image}" alt="${rabbit?.name || 'Bun'}">` : '🐰'}
+            </div>
+            <div class="cart-item-info">
+                <div class="cart-item-header">
+                    <span class="cart-item-name">Visit with ${rabbit?.name || 'Bun'}</span>
+                    <span class="cart-item-badge visit">${visitOption.label}</span>
+                </div>
+                <div class="cart-item-meta">
+                    <span class="cart-item-price">$${item.price.toFixed(2)}</span>
+                    <span class="cart-item-credits">${visitOption.credits}✨</span>
+                </div>
+                ${item.treats?.length > 0 || item.toys?.length > 0 ? `
+                    <div class="cart-item-extras">
+                        ${item.treats?.map(t => `<span class="extra-tag treat">${t.icon || '🥕'}</span>`).join('') || ''}
+                        ${item.toys?.map(t => `<span class="extra-tag toy">${t.icon || '🎾'}</span>`).join('') || ''}
+                    </div>
+                ` : ''}
+            </div>
+            <div class="cart-item-actions">
+                <button class="cart-item-remove" onclick="removeVisitFromCart('${item.id}')" aria-label="Remove visit">×</button>
+            </div>
+        </div>
+    `;
+}
+
+// Remove a visit from cart
+function removeVisitFromCart(visitId) {
+    const visit = state.cart.find(i => i.id === visitId && i.type === 'visit');
+    if (visit) {
+        const rabbit = RABBITS.find(r => r.id === visit.rabbitId);
+        state.cart = state.cart.filter(i => i.id !== visitId);
+        saveState();
+        renderCart();
+        showToast(`Removed visit with ${rabbit?.name || 'Bun'}`, '🗑️');
+    }
+}
+
+// Add a visit to cart
+function addVisitToCart(rabbitId, duration, treats = [], toys = []) {
+    const rabbit = RABBITS.find(r => r.id === rabbitId);
+    const visitOption = getVisitOption(duration);
+
+    if (!rabbit || !visitOption) return;
+
+    // Calculate total price including treats and toys
+    const treatsTotal = treats.reduce((sum, t) => sum + (t.price || 0), 0);
+    const toysTotal = toys.reduce((sum, t) => sum + (t.price || 0), 0);
+    const totalPrice = visitOption.price + treatsTotal + toysTotal;
+
+    const visitItem = {
+        id: `visit-${Date.now()}`,
+        type: 'visit',
+        rabbitId: rabbitId,
+        duration: duration,
+        price: totalPrice,
+        treats: treats,
+        toys: toys,
+        friendshipPoints: visitOption.friendshipPoints
+    };
+
+    state.cart.push(visitItem);
+    saveState();
+    renderCart();
+    showToast(`Added visit with ${rabbit.name} to cart!`, '🐰');
 }
 
 // Remove item completely from cart
@@ -875,7 +1398,8 @@ function removeFromCart(itemId) {
         state.cart = state.cart.filter(i => i.id !== itemId);
         saveState();
         renderCart();
-        showToast(`Removed ${item.name}`, '🗑️');
+        const itemName = item.name || (item.type === 'visit' ? `visit with ${RABBITS.find(r => r.id === item.rabbitId)?.name || 'Bun'}` : 'item');
+        showToast(`Removed ${itemName}`, '🗑️');
     }
 }
 
@@ -891,9 +1415,29 @@ function navigateToMenu() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+// Navigate to rabbits page from empty cart
+function navigateToRabbits() {
+    document.getElementById('cartSidebar').classList.remove('open');
+    unlockScroll();
+    const navLinks = document.querySelectorAll('.nav-link');
+    const pages = document.querySelectorAll('.page');
+    navLinks.forEach(link => link.classList.toggle('active', link.dataset.page === 'rabbits'));
+    pages.forEach(page => page.classList.toggle('active', page.id === 'page-rabbits'));
+    state.currentPage = 'rabbits';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
 function handleCheckout() {
     if (state.cart.length === 0) {
         showToast('Your cart is empty!', '😅');
+        return;
+    }
+
+    // Check for sufficient credits
+    if (!hasEnoughCredits()) {
+        const needed = calculateCartCreditCost();
+        const available = getCreditsRemaining();
+        showToast(`Not enough credits! Need ${needed}, have ${available}. Remove items or come back tomorrow.`, '⏰');
         return;
     }
 
@@ -903,56 +1447,145 @@ function handleCheckout() {
         return;
     }
 
-    // Calculate stamps earned (1 per drink, not snacks)
-    const drinksCount = state.cart.filter(item => !item.isSnack).reduce((sum, item) => sum + item.quantity, 0);
-    const snacksCount = state.cart.filter(item => item.isSnack).reduce((sum, item) => sum + item.quantity, 0);
-    const totalItems = state.cart.reduce((sum, item) => sum + item.quantity, 0);
+    // Separate items by type
+    const drinks = state.cart.filter(item => item.type === 'drink' || (!item.type && !item.isSnack));
+    const snacks = state.cart.filter(item => item.type === 'snack' || item.isSnack);
+    const visits = state.cart.filter(item => item.type === 'visit');
+
+    // Calculate counts
+    const drinksCount = drinks.reduce((sum, item) => sum + (item.quantity || 1), 0);
+    const snacksCount = snacks.reduce((sum, item) => sum + (item.quantity || 1), 0);
+    const visitsCount = visits.length;
 
     // Calculate total cost for spending tracking
-    const cartTotal = state.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const cartTotal = state.cart.reduce((sum, item) => {
+        if (item.type === 'visit') return sum + item.price;
+        return sum + (item.price * (item.quantity || 1));
+    }, 0);
 
-    state.stamps += drinksCount;
-    state.totalStampsEarned += drinksCount;
+    // Calculate stamps (1 per drink, 2 per visit)
+    const stampsEarned = drinksCount + (visitsCount * 2);
+
+    // Spend credits
+    const creditCost = calculateCartCreditCost();
+    spendCredits(creditCost);
+
+    // Update state
+    state.stamps += stampsEarned;
+    state.totalStampsEarned += stampsEarned;
     state.drinksOrdered += drinksCount;
     state.snacksOrdered += snacksCount;
+    state.rabbitVisits += visitsCount;
     state.totalSpent += cartTotal;
 
     // Track signature drinks tried for achievements
-    state.cart.forEach(item => {
-        if (!item.isSnack && item.isSignature && !state.signatureDrinksTried.includes(item.id)) {
+    drinks.forEach(item => {
+        if (item.isSignature && !state.signatureDrinksTried.includes(item.id)) {
             state.signatureDrinksTried.push(item.id);
         }
     });
 
-    // Save order to history
-    const order = {
-        id: Date.now(),
-        date: new Date().toISOString(),
-        items: state.cart.map(item => ({
-            id: item.id,
-            name: item.name,
-            price: item.price,
-            quantity: item.quantity,
-            isSnack: item.isSnack || false,
-            isSignature: item.isSignature || false
-        })),
-        total: cartTotal,
-        stampsEarned: drinksCount,
-        pickupTime: pickupTime
-    };
-    state.orderHistory.unshift(order); // Add to beginning
+    // Process visits - add friendship points and track unique buns
+    visits.forEach(visit => {
+        const rabbitId = visit.rabbitId;
+        addFriendshipPoints(rabbitId, visit.friendshipPoints || 10, 'visit');
 
-    // Keep only last 50 orders
-    if (state.orderHistory.length > 50) {
-        state.orderHistory = state.orderHistory.slice(0, 50);
+        // Track unique buns visited
+        if (!state.uniqueBunsVisited.includes(rabbitId)) {
+            state.uniqueBunsVisited.push(rabbitId);
+        }
+
+        // Track spending for leaderboard
+        addRabbitSpending(rabbitId, visit.price);
+
+        // Track treats and toys given (add friendship points from treats/toys too)
+        if (visit.treats?.length > 0) {
+            state.treatsGivenTotal += visit.treats.length;
+            visit.treats.forEach(treat => {
+                if (state.friendships[rabbitId]) {
+                    state.friendships[rabbitId].treatsGiven++;
+                }
+                // Add treat friendship points
+                if (treat.friendshipPoints) {
+                    addFriendshipPoints(rabbitId, treat.friendshipPoints, 'treat');
+                }
+            });
+        }
+        if (visit.toys?.length > 0) {
+            state.toysPlayedTotal += visit.toys.length;
+            visit.toys.forEach(toy => {
+                if (state.friendships[rabbitId]) {
+                    state.friendships[rabbitId].toysGiven++;
+                }
+                // Add toy friendship points
+                if (toy.friendshipPoints) {
+                    addFriendshipPoints(rabbitId, toy.friendshipPoints, 'toy');
+                }
+            });
+        }
+
+        // Add to visit history
+        const rabbit = RABBITS.find(r => r.id === rabbitId);
+        const visitRecord = {
+            id: visit.id,
+            date: new Date().toISOString(),
+            rabbitId: rabbitId,
+            rabbitName: rabbit?.name || 'Bun',
+            duration: visit.duration,
+            price: visit.price,
+            treats: visit.treats || [],
+            toys: visit.toys || [],
+            friendshipPointsEarned: visit.friendshipPoints || 10
+        };
+        state.visitHistory.unshift(visitRecord);
+    });
+
+    // Keep only last 50 visits
+    if (state.visitHistory.length > 50) {
+        state.visitHistory = state.visitHistory.slice(0, 50);
+    }
+
+    // Save drink/snack order to order history (separate from visits)
+    if (drinks.length > 0 || snacks.length > 0) {
+        const order = {
+            id: Date.now(),
+            date: new Date().toISOString(),
+            items: [...drinks, ...snacks].map(item => ({
+                id: item.id,
+                name: item.name,
+                price: item.price,
+                quantity: item.quantity || 1,
+                isSnack: item.isSnack || item.type === 'snack',
+                isSignature: item.isSignature || false
+            })),
+            total: [...drinks, ...snacks].reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0),
+            stampsEarned: drinksCount,
+            pickupTime: pickupTime
+        };
+        state.orderHistory.unshift(order);
+
+        // Keep only last 50 orders
+        if (state.orderHistory.length > 50) {
+            state.orderHistory = state.orderHistory.slice(0, 50);
+        }
     }
 
     // Show success overlay
     const cartSuccess = document.getElementById('cartSuccess');
     const successStamps = document.getElementById('successStamps');
-    successStamps.textContent = drinksCount > 0
-        ? `+${drinksCount} stamp${drinksCount !== 1 ? 's' : ''} earned!`
-        : 'Thanks for your order!';
+
+    let successMessage = '';
+    if (stampsEarned > 0) {
+        successMessage = `+${stampsEarned} stamp${stampsEarned !== 1 ? 's' : ''} earned!`;
+    }
+    if (visitsCount > 0) {
+        const bunNames = visits.map(v => RABBITS.find(r => r.id === v.rabbitId)?.name || 'Bun').join(', ');
+        successMessage += successMessage ? ` 🐰 ${bunNames}` : `Enjoy your visit with ${bunNames}!`;
+    }
+    if (!successMessage) {
+        successMessage = 'Thanks for your order!';
+    }
+    successStamps.textContent = successMessage;
     cartSuccess.classList.add('show');
 
     // Check for newly unlocked rewards
@@ -968,6 +1601,10 @@ function handleCheckout() {
         renderCart();
         updateStats();
         renderPassport();
+        renderLeaderboard();
+
+        // Refresh credits display
+        refreshMegumiCredits();
 
         // Hide success and close cart
         setTimeout(() => {
@@ -1230,6 +1867,7 @@ function navigateAndOpenDrink(drinkId) {
 function closeAllModals() {
     document.querySelectorAll('.modal').forEach(modal => modal.classList.remove('open'));
     document.getElementById('cartSidebar')?.classList.remove('open');
+    releaseFocus();
     forceUnlockScroll();
 }
 
@@ -1421,7 +2059,7 @@ function addSignatureSnackFromSchedule(snackId) {
 function handleScheduleVisit() {
     const rabbitId = document.getElementById('scheduleRabbit').value;
     const visitTime = document.getElementById('scheduleTime').value;
-    const duration = document.getElementById('scheduleDuration').value;
+    const duration = parseInt(document.getElementById('scheduleDuration').value, 10);
 
     if (!visitTime) {
         showToast('Please select a date and time!', '📅');
@@ -1429,98 +2067,39 @@ function handleScheduleVisit() {
     }
 
     const rabbit = RABBITS.find(r => r.id === rabbitId);
+    const visitOption = getVisitOption(duration);
 
-    // Calculate cost based on duration using VISIT_PRICING from data.js
-    const visitInfo = VISIT_PRICING[duration] || VISIT_PRICING[30];
-    const visitCost = visitInfo.price;
-    const baseFriendshipPoints = visitInfo.friendshipPoints;
+    // Check credit availability
+    const creditCost = visitOption.credits;
+    const currentCartCredits = calculateCartCreditCost();
+    const availableCredits = getCreditsRemaining();
+
+    if (currentCartCredits + creditCost > availableCredits) {
+        showToast(`Not enough credits for this visit! Need ${creditCost} more.`, '⏰');
+        return;
+    }
 
     // Get selected treats and toys
     const selectedTreats = Array.from(document.querySelectorAll('.treat-checkbox:checked'))
-        .map(cb => BUN_TREATS.find(t => t.id === cb.value));
+        .map(cb => BUN_TREATS.find(t => t.id === cb.value))
+        .filter(Boolean);
     const selectedToys = Array.from(document.querySelectorAll('.toy-checkbox:checked'))
-        .map(cb => BUN_TOYS.find(t => t.id === cb.value));
+        .map(cb => BUN_TOYS.find(t => t.id === cb.value))
+        .filter(Boolean);
 
-    // Calculate totals
-    const treatsCost = selectedTreats.reduce((sum, t) => sum + (t?.price || 0), 0);
-    const toysCost = selectedToys.reduce((sum, t) => sum + (t?.price || 0), 0);
-    const totalCost = visitCost + treatsCost + toysCost;
-
-    // Add stamps for booking
-    state.stamps += 2;
-    state.totalStampsEarned += 2;
-    state.rabbitVisits++;
-
-    // Track unique buns visited for achievements
-    if (!state.uniqueBunsVisited.includes(rabbitId)) {
-        state.uniqueBunsVisited.push(rabbitId);
-    }
-
-    // Track total spent for achievements
-    state.totalSpent += totalCost;
-
-    // Add friendship points
-    let totalFriendshipPoints = baseFriendshipPoints;
-
-    selectedTreats.forEach(treat => {
-        if (treat) {
-            totalFriendshipPoints += treat.friendshipPoints;
-            addFriendshipPoints(rabbitId, treat.friendshipPoints, 'treat');
-            state.treatsGivenTotal++;
-        }
-    });
-
-    selectedToys.forEach(toy => {
-        if (toy) {
-            totalFriendshipPoints += toy.friendshipPoints;
-            addFriendshipPoints(rabbitId, toy.friendshipPoints, 'toy');
-            state.toysPlayedTotal++;
-        }
-    });
-
-    // Add base visit points
-    addFriendshipPoints(rabbitId, baseFriendshipPoints, 'visit');
-
-    // Add spending for leaderboard
-    addRabbitSpending(rabbitId, totalCost);
-
-    // Save visit to history
-    const visit = {
-        id: Date.now(),
-        date: new Date().toISOString(),
-        rabbitId: rabbitId,
-        rabbitName: rabbit.name,
-        duration: duration,
-        treats: selectedTreats.map(t => t?.name).filter(Boolean),
-        toys: selectedToys.map(t => t?.name).filter(Boolean),
-        cost: totalCost,
-        friendshipPointsEarned: totalFriendshipPoints
-    };
-    state.visitHistory.unshift(visit);
-
-    // Keep only last 50 visits
-    if (state.visitHistory.length > 50) {
-        state.visitHistory = state.visitHistory.slice(0, 50);
-    }
-
-    checkRewardUnlocks();
-
-    // Check for achievements
-    checkAchievements();
-    saveState();
-    updateStats();
-    renderPassport();
-    renderLeaderboard();
+    // Add visit to cart (checkout handles all tracking)
+    addVisitToCart(rabbitId, duration, selectedTreats, selectedToys);
 
     // Clear checkboxes
     document.querySelectorAll('.treat-checkbox, .toy-checkbox').forEach(cb => cb.checked = false);
 
+    // Close modal
     document.getElementById('scheduleModal').classList.remove('open');
     unlockScroll();
 
-    const treatsMsg = selectedTreats.length > 0 ? ` +${selectedTreats.length} treats` : '';
-    const toysMsg = selectedToys.length > 0 ? ` +${selectedToys.length} toys` : '';
-    showToast(`Visit with ${rabbit.name} booked!${treatsMsg}${toysMsg} +2 stamps!`, '🐰');
+    // Open cart to show the added visit
+    document.getElementById('cartSidebar').classList.add('open');
+    lockScroll();
 }
 
 // ============================================
@@ -1637,16 +2216,21 @@ function renderProfile() {
 // ============================================
 // ORDER & VISIT HISTORY
 // ============================================
-let currentHistoryTab = 'orders';
 
 function initHistory() {
     const tabs = document.querySelectorAll('.history-tab');
+
+    // Set initial active tab from state
+    tabs.forEach(tab => {
+        tab.classList.toggle('active', tab.dataset.history === state.uiState.historyTab);
+    });
 
     tabs.forEach(tab => {
         tab.addEventListener('click', () => {
             tabs.forEach(t => t.classList.remove('active'));
             tab.classList.add('active');
-            currentHistoryTab = tab.dataset.history;
+            state.uiState.historyTab = tab.dataset.history;
+            saveState();
             renderHistory();
         });
     });
@@ -1658,7 +2242,7 @@ function renderHistory() {
     const container = document.getElementById('historyContent');
     if (!container) return;
 
-    if (currentHistoryTab === 'orders') {
+    if (state.uiState.historyTab === 'orders') {
         renderOrderHistory(container);
     } else {
         renderVisitHistory(container);
@@ -1666,7 +2250,13 @@ function renderHistory() {
 }
 
 function renderOrderHistory(container) {
-    if (state.orderHistory.length === 0) {
+    // Combine orders and shop redemptions for display, sorted by date
+    const allActivity = [
+        ...state.orderHistory.map(o => ({ ...o, activityType: 'order' })),
+        ...state.shopRedemptions.map(r => ({ ...r, activityType: 'shop' }))
+    ].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    if (allActivity.length === 0) {
         container.innerHTML = `
             <div class="history-empty">
                 <span class="history-empty-icon">🧋</span>
@@ -1678,22 +2268,22 @@ function renderOrderHistory(container) {
         return;
     }
 
-    container.innerHTML = state.orderHistory.slice(0, 10).map(order => {
-        const date = new Date(order.date);
+    container.innerHTML = allActivity.slice(0, 10).map(activity => {
+        const date = new Date(activity.date);
         const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
         const timeStr = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
 
-        // Handle shop redemptions vs regular orders
-        if (order.type === 'shop') {
+        // Handle shop redemptions
+        if (activity.activityType === 'shop') {
             return `
                 <div class="history-item history-shop">
-                    <div class="history-icon">${order.itemIcon}</div>
+                    <div class="history-icon">${activity.itemIcon}</div>
                     <div class="history-info">
                         <div class="history-title">Shop Redemption</div>
-                        <div class="history-details">${order.itemName}</div>
+                        <div class="history-details">${activity.itemName}</div>
                         <div class="history-meta">
                             <span class="history-date">${dateStr} at ${timeStr}</span>
-                            <span class="history-stamps spent">-${order.stampsCost} stamps</span>
+                            <span class="history-stamps spent">-${activity.stampsCost} stamps</span>
                         </div>
                     </div>
                     <div class="history-price redeemed">🎁</div>
@@ -1702,8 +2292,8 @@ function renderOrderHistory(container) {
         }
 
         // Regular drink/snack order
-        const itemCount = order.items.reduce((sum, item) => sum + item.quantity, 0);
-        const itemNames = order.items.map(i => i.quantity > 1 ? `${i.name} x${i.quantity}` : i.name).join(', ');
+        const itemCount = activity.items.reduce((sum, item) => sum + item.quantity, 0);
+        const itemNames = activity.items.map(i => i.quantity > 1 ? `${i.name} x${i.quantity}` : i.name).join(', ');
 
         return `
             <div class="history-item">
@@ -1713,16 +2303,16 @@ function renderOrderHistory(container) {
                     <div class="history-details">${itemNames}</div>
                     <div class="history-meta">
                         <span class="history-date">${dateStr} at ${timeStr}</span>
-                        ${order.stampsEarned > 0 ? `<span class="history-stamps">+${order.stampsEarned} stamps</span>` : ''}
+                        ${activity.stampsEarned > 0 ? `<span class="history-stamps">+${activity.stampsEarned} stamps</span>` : ''}
                     </div>
                 </div>
-                <div class="history-price">$${order.total.toFixed(2)}</div>
+                <div class="history-price">$${activity.total.toFixed(2)}</div>
             </div>
         `;
     }).join('');
 
-    if (state.orderHistory.length > 10) {
-        container.innerHTML += `<p class="history-more">Showing last 10 of ${state.orderHistory.length} orders</p>`;
+    if (allActivity.length > 10) {
+        container.innerHTML += `<p class="history-more">Showing last 10 of ${allActivity.length} activities</p>`;
     }
 }
 
@@ -1937,16 +2527,21 @@ function checkRewardUnlocks() {
 // ============================================
 // ACHIEVEMENTS / STICKERS
 // ============================================
-let currentAchievementCategory = 'all';
 
 function initAchievements() {
     const tabButtons = document.querySelectorAll('.achievement-tab');
+
+    // Set initial active tab from state
+    tabButtons.forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.category === state.uiState.achievementCategory);
+    });
 
     tabButtons.forEach(btn => {
         btn.addEventListener('click', () => {
             tabButtons.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            currentAchievementCategory = btn.dataset.category;
+            state.uiState.achievementCategory = btn.dataset.category;
+            saveState();
             renderAchievements();
         });
     });
@@ -1976,8 +2571,8 @@ function renderAchievements() {
 
     // Filter achievements by category
     let filteredAchievements = ACHIEVEMENTS;
-    if (currentAchievementCategory !== 'all') {
-        filteredAchievements = ACHIEVEMENTS.filter(a => a.category === currentAchievementCategory);
+    if (state.uiState.achievementCategory !== 'all') {
+        filteredAchievements = ACHIEVEMENTS.filter(a => a.category === state.uiState.achievementCategory);
     }
 
     // Render achievement cards
@@ -2138,21 +2733,20 @@ function confirmShopPurchase() {
     state.stamps -= item.stampsRequired;
     state.purchasedItems.push(item.id);
 
-    // Add to order history
-    const purchase = {
+    // Add to shop redemptions (separate from order history)
+    const redemption = {
         id: Date.now(),
-        type: 'shop',
         date: new Date().toISOString(),
         itemId: item.id,
         itemName: item.name,
         itemIcon: item.icon,
         stampsCost: item.stampsRequired
     };
-    state.orderHistory.unshift(purchase);
+    state.shopRedemptions.unshift(redemption);
 
-    // Keep history manageable
-    if (state.orderHistory.length > 50) {
-        state.orderHistory = state.orderHistory.slice(0, 50);
+    // Keep redemptions manageable
+    if (state.shopRedemptions.length > 50) {
+        state.shopRedemptions = state.shopRedemptions.slice(0, 50);
     }
 
     saveState();
@@ -2175,9 +2769,6 @@ function confirmShopPurchase() {
 // LEADERBOARD (Host Club Style Rankings)
 // Community-wide rankings based on total support
 // ============================================
-
-// Current filter state
-let currentLeaderboardPeriod = 'all';
 
 // Simulated community spending data for all 13 buns (ALL TIME)
 const COMMUNITY_BASE_SPENDING = {
@@ -2249,11 +2840,18 @@ const COMMUNITY_BASE_VISITS = {
 function initLeaderboard() {
     // Set up filter button listeners
     const filterBtns = document.querySelectorAll('.leaderboard-filter');
+
+    // Set initial active button from state
+    filterBtns.forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.period === state.uiState.leaderboardPeriod);
+    });
+
     filterBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             filterBtns.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            currentLeaderboardPeriod = btn.dataset.period;
+            state.uiState.leaderboardPeriod = btn.dataset.period;
+            saveState();
             renderLeaderboard();
         });
     });
@@ -2349,7 +2947,7 @@ function renderYourTopBun() {
 
     const { rabbit, spending } = topBunData;
     const friendshipLevel = getFriendshipLevelForRabbit(rabbit.id);
-    const rankings = getCommunityLeaderboard(currentLeaderboardPeriod);
+    const rankings = getCommunityLeaderboard(state.uiState.leaderboardPeriod);
     const currentRank = rankings.findIndex(r => r.id === rabbit.id) + 1;
 
     container.innerHTML = `
@@ -2375,7 +2973,7 @@ function renderLeaderboard() {
     const leaderboardGrid = document.getElementById('leaderboardGrid');
     if (!leaderboardGrid) return;
 
-    const rankings = getCommunityLeaderboard(currentLeaderboardPeriod);
+    const rankings = getCommunityLeaderboard(state.uiState.leaderboardPeriod);
 
     // Render "Your #1" section
     renderYourTopBun();
@@ -2392,7 +2990,7 @@ function renderLeaderboard() {
         const rarityConfig = getRarityConfig(rabbit.rarity);
 
         // Get movement indicator
-        const movement = getRankMovement(rabbit.id, rank, currentLeaderboardPeriod);
+        const movement = getRankMovement(rabbit.id, rank, state.uiState.leaderboardPeriod);
         const movementHtml = getMovementIndicator(movement.change);
 
         // Check if this is user's top bun
@@ -2401,8 +2999,8 @@ function renderLeaderboard() {
         const userTopBadge = isUserTop ? '<span class="user-top-badge">Your #1</span>' : '';
 
         // Period label
-        const periodLabel = currentLeaderboardPeriod === 'week' ? 'This Week' :
-                           currentLeaderboardPeriod === 'month' ? 'This Month' : 'Total';
+        const periodLabel = state.uiState.leaderboardPeriod === 'week' ? 'This Week' :
+                           state.uiState.leaderboardPeriod === 'month' ? 'This Month' : 'Total';
 
         return `
             <div class="leaderboard-card ${rankClass} ${userTopClass}" data-rabbit-id="${rabbit.id}">
@@ -2445,7 +3043,7 @@ function renderLeaderboard() {
     const podium = document.getElementById('leaderboardPodium');
     if (podium && rankings.length >= 3) {
         const getMovementForPodium = (rabbitId, rank) => {
-            const movement = getRankMovement(rabbitId, rank, currentLeaderboardPeriod);
+            const movement = getRankMovement(rabbitId, rank, state.uiState.leaderboardPeriod);
             return getMovementIndicator(movement.change);
         };
 
@@ -2491,6 +3089,14 @@ function initDailyCheckin() {
     checkinBtn.addEventListener('click', handleCheckin);
 }
 
+// Calculate streak bonus stamps
+function getStreakBonus(streak) {
+    if (streak >= 30) return 5;
+    if (streak >= 14) return 3;
+    if (streak >= 7) return 2;
+    return 1;
+}
+
 function renderCheckin() {
     const checkinRabbit = document.getElementById('checkinRabbit');
     const checkinMessage = document.getElementById('checkinMessage');
@@ -2510,12 +3116,18 @@ function renderCheckin() {
     const rabbitName = messageRabbit ? messageRabbit.name : dailyMessage.rabbit.charAt(0).toUpperCase() + dailyMessage.rabbit.slice(1);
     checkinMessage.textContent = `${rabbitName} says: "${dailyMessage.message}"`;
 
+    // Calculate potential streak bonus
+    const potentialStreak = state.currentStreak + 1;
+    const bonus = getStreakBonus(potentialStreak);
+    const streakDisplay = state.currentStreak > 0 ? ` 🔥${state.currentStreak}` : '';
+
     if (state.checkedInToday) {
-        checkinBtn.textContent = 'See you tomorrow!';
+        checkinBtn.textContent = `See you tomorrow!${streakDisplay}`;
         checkinBtn.disabled = true;
         checkinBtn.style.opacity = '0.5';
     } else {
-        checkinBtn.textContent = 'Say Hi! (+1 stamp)';
+        const bonusText = bonus > 1 ? `+${bonus} stamps` : '+1 stamp';
+        checkinBtn.textContent = `Say Hi! (${bonusText})${streakDisplay}`;
         checkinBtn.disabled = false;
         checkinBtn.style.opacity = '1';
     }
@@ -2524,9 +3136,38 @@ function renderCheckin() {
 function handleCheckin() {
     if (state.checkedInToday) return;
 
-    state.stamps++;
+    const today = new Date().toISOString().split('T')[0];
+
+    // Check if this continues a streak (yesterday was last check-in)
+    if (state.lastCheckinDate) {
+        const lastDate = new Date(state.lastCheckinDate);
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+        if (state.lastCheckinDate === yesterdayStr) {
+            // Continue streak
+            state.currentStreak++;
+        } else {
+            // Streak broken, start fresh
+            state.currentStreak = 1;
+        }
+    } else {
+        // First check-in ever
+        state.currentStreak = 1;
+    }
+
+    // Update longest streak
+    if (state.currentStreak > state.longestStreak) {
+        state.longestStreak = state.currentStreak;
+    }
+
+    // Award stamps based on streak
+    const bonus = getStreakBonus(state.currentStreak);
+    state.stamps += bonus;
     state.checkedInToday = true;
     state.lastCheckin = new Date().toISOString();
+    state.lastCheckinDate = today;
 
     checkRewardUnlocks();
     saveState();
@@ -2534,7 +3175,12 @@ function handleCheckin() {
     renderPassport();
     renderCheckin();
 
-    showToast('Daily check-in complete! +1 stamp!', '🐰');
+    // Show streak-aware toast
+    let toastMessage = `Daily check-in complete! +${bonus} stamp${bonus > 1 ? 's' : ''}!`;
+    if (state.currentStreak >= 7) {
+        toastMessage += ` 🔥${state.currentStreak} day streak!`;
+    }
+    showToast(toastMessage, '🐰');
 }
 
 // ============================================
@@ -2960,3 +3606,7 @@ window.closeAllModals = closeAllModals;
 window.addSnackToCart = addSnackToCart;
 window.addSignatureDrinkFromSchedule = addSignatureDrinkFromSchedule;
 window.addSignatureSnackFromSchedule = addSignatureSnackFromSchedule;
+window.removeVisitFromCart = removeVisitFromCart;
+window.addVisitToCart = addVisitToCart;
+window.navigateToMenu = navigateToMenu;
+window.navigateToRabbits = navigateToRabbits;
