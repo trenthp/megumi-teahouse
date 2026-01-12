@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Megumi's Usagi Cafe | 兎茶店</title>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,709 +13,437 @@
     <!-- Floating Boba Particles Background -->
     <div class="boba-particles" id="bobaParticles"></div>
 
-    <!-- Navigation -->
-    <nav class="main-nav">
-        <div class="nav-inner">
-            <a href="#" class="nav-logo" data-navigate="home">
-                <img src="images/logo_hero_2.svg" alt="Megumi's Usagi Cafe" class="logo-icon">
-            </a>
-            <div class="nav-links">
-                <button class="nav-link active" data-page="home">home</button>
-                <button class="nav-link" data-page="menu">menu</button>
-                <button class="nav-link" data-page="rabbits">rabbits</button>
-                <button class="nav-link" data-page="leaderboard">rankings</button>
-                <button class="nav-link" data-page="passport">passport</button>
-                <button class="nav-link" data-page="shop">shop</button>
+    <!-- ============================================
+         CAFE VIEWPORT - The "Game World"
+         ============================================ -->
+    <div class="cafe-viewport" id="cafeViewport">
+
+        <!-- OUTSIDE SCENE (Storefront) -->
+        <section class="cafe-scene cafe-outside" id="sceneOutside">
+            <!-- Background Image -->
+            <div class="scene-bg"></div>
+
+            <!-- Content Overlay -->
+            <div class="scene-content">
+                <div class="hero-panel">
+                    <div class="hero-mascot">
+                        <img src="images/logo_hero.svg" alt="兎茶店" class="hero-mascot-img animate-float">
+                    </div>
+                    <div class="hero-content">
+                        <div class="hero-title">
+                            <span class="title-en">Megumi's Usagi Cafe</span>
+                        </div>
+                        <p class="hero-desc">Bubble tea & bunny friends. Collect stamps, meet our rabbits, unlock exclusive goodies.</p>
+                        <div class="hero-actions">
+                            <button class="btn btn-primary btn-enter" data-location="inside">
+                                <span>Enter the Cafe</span>
+                                <span class="btn-icon">🚪</span>
+                            </button>
+                        </div>
+                        <img src="images/logo_mascot_ink.svg" alt="Megumi" class="hero-logo-img">
+                        <p class="hero-tagline">i bite.</p>
+                    </div>
+
+                    <!-- Cafe Options -->
+                    <div class="cafe-options">
+                        <button class="cafe-option-btn" onclick="openRankingsModal()">
+                            <span class="option-icon">🏆</span>
+                            <span class="option-label">Rankings</span>
+                        </button>
+                        <button class="cafe-option-btn" onclick="openFeaturedModal()">
+                            <span class="option-icon">⭐</span>
+                            <span class="option-label">Featured</span>
+                        </button>
+                        <button class="cafe-option-btn" onclick="openTrendingModal()">
+                            <span class="option-icon">🔥</span>
+                            <span class="option-label">Trending</span>
+                        </button>
+                    </div>
+                </div>
             </div>
-            <div class="nav-actions">
-                <button class="cart-btn" id="cartBtn">
-                    <span class="cart-icon">🧋</span>
-                    <span class="cart-count" id="cartCount">0</span>
+        </section>
+
+        <!-- INSIDE SCENE (Cafe Interior) -->
+        <section class="cafe-scene cafe-inside" id="sceneInside">
+            <!-- Ambient floating buns decoration -->
+            <div class="ambient-buns" id="ambientBuns"></div>
+
+            <!-- Background Image -->
+            <div class="scene-bg"></div>
+
+            <!-- Content Overlay -->
+            <div class="scene-content">
+                <div class="inside-panel">
+                    <h2 class="inside-title">Welcome Inside</h2>
+                    <p class="inside-subtitle">What would you like to do?</p>
+
+                    <!-- Action Grid -->
+                    <div class="inside-actions-grid">
+                        <button class="inside-action-card" data-action="open-phone" data-app="menu">
+                            <span class="inside-action-icon">🧋</span>
+                            <span class="inside-action-label">Order Drinks</span>
+                        </button>
+                        <button class="inside-action-card" data-action="open-phone" data-app="menu" data-section="buns">
+                            <span class="inside-action-icon">🐰</span>
+                            <span class="inside-action-label">Meet Buns</span>
+                        </button>
+                        <button class="inside-action-card" data-action="schedule">
+                            <span class="inside-action-icon">🪑</span>
+                            <span class="inside-action-label">Book Visit</span>
+                        </button>
+                        <button class="inside-action-card" data-action="open-phone" data-app="passport">
+                            <span class="inside-action-icon">📔</span>
+                            <span class="inside-action-label">Passport</span>
+                        </button>
+                    </div>
+
+                    <button class="btn btn-secondary btn-exit" data-location="outside">
+                        <span class="btn-icon">🚪</span>
+                        <span>Exit Cafe</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- ============================================
+         PHONE UI - Smartphone with Apps
+         ============================================ -->
+    <div class="phone-backdrop" id="phoneBackdrop"></div>
+
+    <!-- Modal backdrop (shared by all modals) -->
+    <div class="modal-backdrop" id="modalBackdrop"></div>
+
+    <div class="phone" id="phone">
+        <div class="phone-frame">
+            <div class="phone-screen">
+
+                <!-- MENU APP -->
+                <div class="phone-app" id="phoneAppMenu" data-app="menu">
+                    <div class="phone-app__header">
+                        <h2 class="app-title">Menu & Buns</h2>
+                        <p class="app-subtitle">Order drinks, meet the residents</p>
+                    </div>
+
+                    <!-- Cafe Navigation Tabs -->
+                    <div class="phone-app__tabs cafe-tabs">
+                        <button class="cafe-tab active" data-cafe-section="buns">
+                            <span class="cafe-tab-icon">🐰</span>
+                            <span class="cafe-tab-label">Buns</span>
+                        </button>
+                        <button class="cafe-tab" data-cafe-section="drinks">
+                            <span class="cafe-tab-icon">🧋</span>
+                            <span class="cafe-tab-label">Drinks</span>
+                        </button>
+                        <button class="cafe-tab" data-cafe-section="snacks">
+                            <span class="cafe-tab-icon">🍡</span>
+                            <span class="cafe-tab-label">Snacks</span>
+                        </button>
+                        <button class="cafe-tab" data-cafe-section="rewards">
+                            <span class="cafe-tab-icon">⭐</span>
+                            <span class="cafe-tab-label">Rewards</span>
+                        </button>
+                    </div>
+
+                    <div class="phone-app__body">
+                        <!-- BUNS SECTION -->
+                        <div class="cafe-section cafe-buns active" id="cafeBuns">
+                            <div class="section-intro">
+                                <p>Spend time with our fluffy residents! Book a visit, give treats, and build lasting friendships.</p>
+                            </div>
+                            <div class="rabbits-grid" id="rabbitsGrid">
+                                <!-- Rabbit cards populated by JS -->
+                            </div>
+                        </div>
+
+                        <!-- DRINKS SECTION -->
+                        <div class="cafe-section cafe-drinks" id="cafeDrinks">
+                            <div class="section-intro">
+                                <p>Handcrafted with love (and a little spite). Each drink earns you a stamp!</p>
+                            </div>
+                            <div class="menu-filters">
+                                <button class="filter-btn active" data-filter="all">All</button>
+                                <button class="filter-btn" data-filter="signature">Signature</button>
+                                <button class="filter-btn" data-filter="classic">Classic</button>
+                                <button class="filter-btn" data-filter="yogurt">Rice Yogurt</button>
+                                <button class="filter-btn" data-filter="seasonal">Seasonal</button>
+                            </div>
+                            <div class="menu-grid" id="menuGrid">
+                                <!-- Drinks populated by JS -->
+                            </div>
+                        </div>
+
+                        <!-- SNACKS SECTION -->
+                        <div class="cafe-section cafe-snacks" id="cafeSnacks">
+                            <div class="section-intro">
+                                <p>Pair with your drink or grab for the road. Perfect companions for bun watching!</p>
+                            </div>
+                            <div class="snacks-grid" id="snacksGrid">
+                                <!-- Snacks populated by JS -->
+                            </div>
+                        </div>
+
+                        <!-- REWARDS SECTION -->
+                        <div class="cafe-section cafe-rewards" id="cafeRewards">
+                            <div class="section-intro">
+                                <div class="rewards-balance">
+                                    <span class="rewards-balance-icon">⭐</span>
+                                    <span class="rewards-balance-amount" id="rewardsBalance">0</span>
+                                    <span class="rewards-balance-label">stamps to spend</span>
+                                </div>
+                                <p>Redeem your stamps for exclusive cafe goodies! Add items to cart and checkout.</p>
+                            </div>
+                            <div class="rewards-grid" id="rewardsGrid">
+                                <!-- Rewards items populated by JS -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PASSPORT APP -->
+                <div class="phone-app active" id="phoneAppPassport" data-app="passport">
+                    <!-- First-time Onboarding -->
+                    <div class="passport-onboarding" id="passportOnboarding">
+                        <div class="onboarding-content">
+                            <span class="onboarding-icon">📔</span>
+                            <h2>Welcome to Your Cafe Passport!</h2>
+                            <p>Set up your profile to start collecting stamps and stickers.</p>
+                            <div class="onboarding-form">
+                                <div class="form-group">
+                                    <label class="form-label">Your Name</label>
+                                    <input type="text" id="onboardingName" class="form-input" placeholder="Enter your name" maxlength="20">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Choose Your Avatar</label>
+                                    <div class="avatar-picker" id="onboardingAvatarPicker">
+                                        <button class="avatar-option active" data-avatar="🐰">🐰</button>
+                                        <button class="avatar-option" data-avatar="🐇">🐇</button>
+                                        <button class="avatar-option" data-avatar="🧋">🧋</button>
+                                        <button class="avatar-option" data-avatar="🍵">🍵</button>
+                                        <button class="avatar-option" data-avatar="⭐">⭐</button>
+                                        <button class="avatar-option" data-avatar="🌸">🌸</button>
+                                        <button class="avatar-option" data-avatar="💖">💖</button>
+                                        <button class="avatar-option" data-avatar="🎀">🎀</button>
+                                        <button class="avatar-option" data-avatar="✨">✨</button>
+                                        <button class="avatar-option" data-avatar="🌙">🌙</button>
+                                        <button class="avatar-option" data-avatar="🍡">🍡</button>
+                                        <button class="avatar-option" data-avatar="🥕">🥕</button>
+                                    </div>
+                                </div>
+                                <button class="btn btn-primary btn-full" id="onboardingComplete">Start My Journey</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Main Passport Content (for returning users) -->
+                    <div class="passport-main" id="passportMain">
+                        <!-- Stats & Progress Overview (Header Zone) -->
+                        <div class="phone-app__header passport-overview">
+                            <div class="passport-stats-bar">
+                                <div class="stat-chip">
+                                    <span class="stat-chip-icon">🍵</span>
+                                    <span class="stat-chip-value" id="passportDrinks">0</span>
+                                    <span class="stat-chip-label">drinks</span>
+                                </div>
+                                <div class="stat-chip">
+                                    <span class="stat-chip-icon">🐇</span>
+                                    <span class="stat-chip-value" id="passportVisits">0</span>
+                                    <span class="stat-chip-label">visits</span>
+                                </div>
+                                <div class="stat-chip">
+                                    <span class="stat-chip-icon">⭐</span>
+                                    <span class="stat-chip-value" id="passportStamps">0</span>
+                                    <span class="stat-chip-label">stamps</span>
+                                </div>
+                                <div class="stat-chip">
+                                    <span class="stat-chip-icon">🏆</span>
+                                    <span class="stat-chip-value" id="passportAchievements">0</span>
+                                    <span class="stat-chip-label">stickers</span>
+                                </div>
+                            </div>
+                            <div class="passport-progress-row">
+                                <div class="progress-item">
+                                    <span class="progress-item-label">Next Reward:</span>
+                                    <span class="progress-item-name" id="passportNextReward">-</span>
+                                    <div class="progress-bar-mini">
+                                        <div class="progress-bar-fill" id="passportRewardProgress" style="width: 0%"></div>
+                                    </div>
+                                    <span class="progress-item-text" id="passportRewardText">0/0</span>
+                                </div>
+                                <div class="progress-item">
+                                    <span class="progress-item-label">Best Bun:</span>
+                                    <span class="progress-item-name" id="passportBestBun">-</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="phone-app__body passport-layout">
+                            <!-- Left Sidebar: Profile -->
+                            <aside class="passport-sidebar">
+                                <!-- User Profile -->
+                                <div class="passport-profile">
+                                    <div class="passport-avatar" id="profileAvatar">🐰</div>
+                                    <div class="passport-name" id="profileName">Guest</div>
+                                    <button class="passport-edit-btn" id="profileEditBtn">Edit</button>
+                                    <div class="passport-stats">
+                                        <div class="passport-stat">
+                                            <span class="passport-stat-value" id="profileStamps">0</span>
+                                            <span class="passport-stat-label">Stamps</span>
+                                        </div>
+                                        <div class="passport-stat">
+                                            <span class="passport-stat-value" id="profileVisits">0</span>
+                                            <span class="passport-stat-label">Visits</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Collection Stats -->
+                                <div class="passport-collection-stats">
+                                    <h4>Collection Progress</h4>
+                                    <div class="collection-stat-row">
+                                        <span>Stamps</span>
+                                        <span id="collectionStamps">0</span>
+                                    </div>
+                                    <div class="collection-stat-row">
+                                        <span>Bun Stickers</span>
+                                        <span id="collectionBuns">0 / 65</span>
+                                    </div>
+                                    <div class="collection-stat-row">
+                                        <span>Achievements</span>
+                                        <span id="collectionAchievements">0 / 40</span>
+                                    </div>
+                                    <div class="collection-stat-row">
+                                        <span>Shop Items</span>
+                                        <span id="collectionItems">0 / 8</span>
+                                    </div>
+                                </div>
+                            </aside>
+
+                            <!-- Main Canvas Area -->
+                            <div class="passport-canvas-wrapper">
+                                <div class="canvas-header">
+                                    <h2 class="canvas-title">Cafe Passport</h2>
+                                    <div class="canvas-tabs">
+                                        <button class="canvas-tab active" data-canvas-view="all">All</button>
+                                        <button class="canvas-tab" data-canvas-view="stamps">Stamps</button>
+                                        <button class="canvas-tab" data-canvas-view="buns">Buns</button>
+                                        <button class="canvas-tab" data-canvas-view="achievements">Stickers</button>
+                                        <button class="canvas-tab" data-canvas-view="items">Items</button>
+                                    </div>
+                                </div>
+                                <div class="passport-canvas" id="passportCanvas">
+                                    <!-- Draggable collectibles rendered here by JS -->
+                                    <div class="canvas-empty" id="canvasEmpty">
+                                        <span class="canvas-empty-icon">📔</span>
+                                        <p class="canvas-empty-text">Your passport is empty!</p>
+                                        <p class="canvas-empty-hint">Order drinks to earn stamps, visit buns to unlock friendship stickers.</p>
+                                        <button class="btn btn-primary" data-action="switch-app" data-app="menu">Start Collecting</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CART APP -->
+                <div class="phone-app" id="phoneAppCart" data-app="cart">
+                    <div class="phone-app__header">
+                        <h2 class="app-title">Your Order</h2>
+                        <p class="app-subtitle">Ready when you are</p>
+                    </div>
+
+                    <div class="phone-app__body cart-items" id="cartItems">
+                        <!-- Cart items populated by JS -->
+                        <div class="cart-empty" id="cartEmpty">
+                            <span class="cart-empty-icon">🧋</span>
+                            <p class="cart-empty-text">Your cart is empty</p>
+                            <button class="btn btn-secondary" data-action="switch-app" data-app="menu">Browse Menu</button>
+                        </div>
+                    </div>
+
+                    <div class="phone-app__footer cart-footer" id="cartFooter">
+                        <div class="cart-summary" id="cartSummary">
+                            <!-- Order summary populated by JS -->
+                        </div>
+                        <div class="cart-pickup">
+                            <label for="pickupTime">Pickup Time</label>
+                            <input type="datetime-local" id="pickupTime" class="pickup-input">
+                        </div>
+                        <button class="btn btn-primary btn-full" id="checkoutBtn">
+                            <span class="checkout-text">Place Order</span>
+                            <span class="checkout-total" id="checkoutTotal">$0.00</span>
+                        </button>
+                        <p class="cart-note">
+                            <span class="cart-note-icon">⭐</span>
+                            <span id="stampsPreview">+0 stamps with this order!</span>
+                        </p>
+                    </div>
+
+                    <!-- Order Success Overlay -->
+                    <div class="cart-success" id="cartSuccess">
+                        <div class="cart-success-content">
+                            <span class="success-icon">🎉</span>
+                            <h3>Order Placed!</h3>
+                            <p class="success-stamps" id="successStamps"></p>
+                            <p class="success-message">See you soon!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Phone Tab Bar -->
+            <nav class="phone-tabs">
+                <button class="phone-tab active" data-app="passport" data-icon="📔">Passport</button>
+                <button class="phone-tab" data-app="menu" data-icon="🍵">Menu</button>
+                <button class="phone-tab" data-app="cart" data-icon="🛒">
+                    Cart
+                    <span class="tab-badge" id="cartBadge"></span>
                 </button>
-            </div>
+            </nav>
         </div>
-    </nav>
+    </div>
 
-    <!-- Mobile Nav Toggle -->
-    <button class="mobile-nav-toggle" id="mobileNavToggle">
-        <span></span>
-        <span></span>
-        <span></span>
-    </button>
-
-    <!-- Main Content Area -->
-    <main class="main-content">
-
-        <!-- HOME PAGE -->
-        <section class="page page-home active" id="page-home">
-            <div class="hero">
-                <div class="hero-mascot">
-                    <img src="images/logo_hero.svg" alt="兎茶店" class="hero-mascot-img bounce-slow">
-                </div>
-                <div class="hero-content">
-                    <div class="hero-title">
-                        <span class="title-en">Megumi's Usagi Cafe</span>
-                    </div>
-
-                    <p class="hero-desc">Bubble tea & bunny friends. Collect stamps, meet our rabbits, unlock exclusive goodies.</p>
-                    <div class="hero-actions">
-                        <button class="btn btn-primary" data-navigate="menu">Order Now</button>
-                        <button class="btn btn-secondary" data-navigate="rabbits">Meet the Buns</button>
-                    </div>
-                    <img src="images/logo_mascot_ink.svg" alt="Megumi" class="hero-logo-img">
-                    <p class="hero-tagline">i bite.</p>
-                </div>
+    <!-- ============================================
+         UNIVERSAL MODAL - Single modal for all content
+         ============================================ -->
+    <div class="modal" id="appModal">
+        <div class="modal-content">
+            <button class="modal-close" aria-label="Close">&times;</button>
+            <div class="modal-body">
+                <!-- All content populated by JS -->
             </div>
-
-            <!-- Personalized Welcome (for returning users) -->
-            <div class="home-welcome" id="homeWelcome">
-                <div class="welcome-content">
-                    <h2 class="welcome-greeting" id="welcomeGreeting">Welcome back!</h2>
-                    <p class="welcome-message" id="welcomeMessage">Ready for another adventure?</p>
-                </div>
-                <div class="welcome-actions" id="welcomeActions">
-                    <!-- Dynamic CTAs populated by JS -->
-                </div>
-            </div>
-
-            <!-- Daily Rabbit Check-in -->
-            <div class="daily-checkin" id="dailyCheckin">
-                <div class="checkin-card">
-                    <div class="checkin-rabbit" id="checkinRabbit"></div>
-                    <div class="checkin-content">
-                        <h3>Daily Bun Visit</h3>
-                        <p class="checkin-message" id="checkinMessage"></p>
-                        <button class="btn btn-small" id="checkinBtn">Say Hi!</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Quick Stats -->
-            <div class="quick-stats">
-                <div class="stat-card" data-navigate="passport" style="cursor: pointer;">
-                    <span class="stat-icon">🍵</span>
-                    <span class="stat-value" id="statDrinks">0</span>
-                    <span class="stat-label">drinks ordered</span>
-                </div>
-                <div class="stat-card" data-navigate="passport" style="cursor: pointer;">
-                    <span class="stat-icon">🐇</span>
-                    <span class="stat-value" id="statVisits">0</span>
-                    <span class="stat-label">rabbit visits</span>
-                </div>
-                <div class="stat-card" data-navigate="passport" style="cursor: pointer;">
-                    <span class="stat-icon">⭐</span>
-                    <span class="stat-value" id="statStamps">0</span>
-                    <span class="stat-label">stamps collected</span>
-                </div>
-            </div>
-
-            <!-- Progress Section (for returning users) -->
-            <div class="home-progress" id="homeProgress">
-                <h3 class="home-section-title">Your Progress</h3>
-                <div class="progress-cards">
-                    <!-- Next Reward -->
-                    <div class="progress-card" data-navigate="passport" style="cursor: pointer;">
-                        <div class="progress-card-header">
-                            <span class="progress-card-icon">🎁</span>
-                            <span class="progress-card-title">Next Reward</span>
-                        </div>
-                        <div class="progress-card-content">
-                            <div class="progress-reward-name" id="nextRewardName">-</div>
-                            <div class="progress-bar-container">
-                                <div class="progress-bar-fill" id="nextRewardProgress" style="width: 0%"></div>
-                            </div>
-                            <div class="progress-text" id="nextRewardText">0 / 0 stamps</div>
-                        </div>
-                    </div>
-                    <!-- Best Friend -->
-                    <div class="progress-card" id="bestFriendCard" style="cursor: pointer;">
-                        <div class="progress-card-header">
-                            <span class="progress-card-icon">💕</span>
-                            <span class="progress-card-title">Best Friend</span>
-                        </div>
-                        <div class="progress-card-content">
-                            <div class="progress-bun-info" id="bestFriendInfo">
-                                <span class="progress-bun-name">No friends yet</span>
-                            </div>
-                            <div class="progress-bar-container">
-                                <div class="progress-bar-fill" id="bestFriendProgress" style="width: 0%"></div>
-                            </div>
-                            <div class="progress-text" id="bestFriendText">Visit buns to build friendship!</div>
-                        </div>
-                    </div>
-                    <!-- Achievements -->
-                    <div class="progress-card" data-navigate="passport" style="cursor: pointer;">
-                        <div class="progress-card-header">
-                            <span class="progress-card-icon">🏆</span>
-                            <span class="progress-card-title">Stickers</span>
-                        </div>
-                        <div class="progress-card-content">
-                            <div class="progress-achievement-count" id="achievementProgressCount">0 / 0</div>
-                            <div class="progress-bar-container">
-                                <div class="progress-bar-fill" id="achievementProgress" style="width: 0%"></div>
-                            </div>
-                            <div class="progress-text" id="nextAchievementText">Keep exploring!</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Featured Bun Section -->
-            <div class="home-featured" id="homeFeatured">
-                <h3 class="home-section-title">Today's Star Bun</h3>
-                <div class="featured-bun-card" id="featuredBunCard">
-                    <!-- Populated by JS -->
-                </div>
-            </div>
-
-            <!-- How It Works (for new users) -->
-            <div class="home-how-it-works" id="homeHowItWorks">
-                <h3 class="home-section-title">How It Works</h3>
-                <div class="how-it-works-steps">
-                    <div class="how-step">
-                        <div class="how-step-icon">🧋</div>
-                        <h4 class="how-step-title">Order Drinks</h4>
-                        <p class="how-step-desc">Browse our handcrafted bubble tea menu and earn stamps with every drink.</p>
-                    </div>
-                    <div class="how-step">
-                        <div class="how-step-icon">🐰</div>
-                        <h4 class="how-step-title">Meet the Buns</h4>
-                        <p class="how-step-desc">Book time with our 13 resident rabbits. Give treats, play, and build friendships!</p>
-                    </div>
-                    <div class="how-step">
-                        <div class="how-step-icon">⭐</div>
-                        <h4 class="how-step-title">Collect & Unlock</h4>
-                        <p class="how-step-desc">Earn stamps and achievement stickers to unlock exclusive rewards and goodies.</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Trending Section -->
-            <div class="home-trending" id="homeTrending">
-                <h3 class="home-section-title">Trending Now</h3>
-                <div class="trending-grid" id="trendingGrid">
-                    <!-- Populated by JS -->
-                </div>
-            </div>
-        </section>
-
-        <!-- MENU PAGE -->
-        <section class="page page-menu" id="page-menu">
-            <div class="page-header">
-                <h2 class="page-title">Our Drinks</h2>
-                <p class="page-subtitle">handcrafted with love (and a little spite)</p>
-            </div>
-
-            <div class="menu-filters">
-                <button class="filter-btn active" data-filter="all">All</button>
-                <button class="filter-btn" data-filter="signature">Signature</button>
-                <button class="filter-btn" data-filter="classic">Classic</button>
-                <button class="filter-btn" data-filter="yogurt">Rice Yogurt</button>
-                <button class="filter-btn" data-filter="seasonal">Seasonal</button>
-            </div>
-
-            <div class="menu-grid" id="menuGrid">
-                <!-- Drinks populated by JS -->
-            </div>
-
-            <div class="menu-section-divider">
-                <h3>Snacks & Treats</h3>
-                <p>pair with your drink or grab for the road</p>
-            </div>
-
-            <div class="snacks-grid" id="snacksGrid">
-                <!-- Snacks populated by JS -->
-            </div>
-
-            <!-- Drink Detail Modal -->
-            <div class="modal drink-modal" id="drinkModal">
-                <div class="modal-content drink-card-detail">
-                    <button class="modal-close" id="drinkModalClose">&times;</button>
-                    <div class="drink-card-inner" id="drinkCardInner">
-                        <!-- Populated by JS -->
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- RABBITS PAGE -->
-        <section class="page page-rabbits" id="page-rabbits">
-            <div class="page-header">
-                <h2 class="page-title">Our Rabbits</h2>
-                <p class="page-subtitle">they might let you pet them. no promises.</p>
-            </div>
-
-            <div class="rabbits-grid" id="rabbitsGrid">
-                <!-- Rabbit cards populated by JS -->
-            </div>
-
-            <!-- Rabbit Detail Modal -->
-            <div class="modal rabbit-modal" id="rabbitModal">
-                <div class="modal-content rabbit-card-detail">
-                    <button class="modal-close" id="rabbitModalClose">&times;</button>
-                    <div class="rabbit-card-inner" id="rabbitCardInner">
-                        <!-- Populated by JS -->
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- LEADERBOARD PAGE -->
-        <section class="page page-leaderboard" id="page-leaderboard">
-            <div class="page-header">
-                <h2 class="page-title">Bun Rankings</h2>
-                <p class="page-subtitle">support your favorite bun to the top!</p>
-            </div>
-
-            <!-- Time Period Filters -->
-            <div class="leaderboard-filters">
-                <button class="leaderboard-filter active" data-period="all">All Time</button>
-                <button class="leaderboard-filter" data-period="month">This Month</button>
-                <button class="leaderboard-filter" data-period="week">This Week</button>
-            </div>
-
-            <!-- Your Top Bun Highlight -->
-            <div class="your-top-bun" id="yourTopBun">
-                <!-- Populated by JS if user has spending -->
-            </div>
-
-            <div class="leaderboard-podium" id="leaderboardPodium">
-                <!-- Top 3 podium populated by JS -->
-            </div>
-
-            <div class="leaderboard-grid" id="leaderboardGrid">
-                <!-- Rankings populated by JS -->
-            </div>
-
-            <div class="leaderboard-info">
-                <h4>How Rankings Work</h4>
-                <p>Buns are ranked by total support from customers. Spend money on visits, treats, and toys to push your favorite bun to #1!</p>
-                <div class="ranking-tips">
-                    <div class="tip">
-                        <span class="tip-icon">🎫</span>
-                        <span>Book visits ($10-30)</span>
-                    </div>
-                    <div class="tip">
-                        <span class="tip-icon">🥕</span>
-                        <span>Give treats ($2-4)</span>
-                    </div>
-                    <div class="tip">
-                        <span class="tip-icon">🧩</span>
-                        <span>Buy toys ($5-12)</span>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- PASSPORT PAGE -->
-        <section class="page page-passport" id="page-passport">
-            <div class="page-header">
-                <h2 class="page-title">Stamp Passport</h2>
-                <p class="page-subtitle">collect stamps, unlock rewards</p>
-            </div>
-
-            <!-- User Profile Card -->
-            <div class="profile-card" id="profileCard">
-                <div class="profile-avatar" id="profileAvatar">🐰</div>
-                <div class="profile-info">
-                    <div class="profile-name-row">
-                        <span class="profile-name" id="profileName">Guest</span>
-                        <button class="profile-edit-btn" id="profileEditBtn" title="Edit Profile">✏️</button>
-                    </div>
-                    <div class="profile-stats">
-                        <span class="profile-stat"><strong id="profileDrinks">0</strong> drinks</span>
-                        <span class="profile-stat"><strong id="profileVisits">0</strong> visits</span>
-                        <span class="profile-stat"><strong id="profileStamps">0</strong> stamps</span>
-                    </div>
-                    <div class="profile-member-since" id="profileMemberSince">New member</div>
-                </div>
-            </div>
-
-            <!-- Profile Edit Modal -->
-            <div class="modal profile-modal" id="profileModal">
-                <div class="modal-content profile-modal-content">
-                    <button class="modal-close" id="profileModalClose">&times;</button>
-                    <h3 class="profile-modal-title">Edit Profile</h3>
-                    <div class="profile-edit-form">
-                        <div class="form-group">
-                            <label class="form-label">Your Name</label>
-                            <input type="text" id="profileNameInput" class="form-input" placeholder="Enter your name" maxlength="20">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Choose Your Avatar</label>
-                            <div class="avatar-picker" id="avatarPicker">
-                                <button class="avatar-option" data-avatar="🐰">🐰</button>
-                                <button class="avatar-option" data-avatar="🐇">🐇</button>
-                                <button class="avatar-option" data-avatar="🧋">🧋</button>
-                                <button class="avatar-option" data-avatar="🍵">🍵</button>
-                                <button class="avatar-option" data-avatar="⭐">⭐</button>
-                                <button class="avatar-option" data-avatar="🌸">🌸</button>
-                                <button class="avatar-option" data-avatar="💖">💖</button>
-                                <button class="avatar-option" data-avatar="🎀">🎀</button>
-                                <button class="avatar-option" data-avatar="✨">✨</button>
-                                <button class="avatar-option" data-avatar="🌙">🌙</button>
-                                <button class="avatar-option" data-avatar="🍡">🍡</button>
-                                <button class="avatar-option" data-avatar="🥕">🥕</button>
-                            </div>
-                        </div>
-                        <button class="btn btn-primary btn-full" id="profileSaveBtn">Save Profile</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Shop Purchase Modal -->
-            <div class="modal shop-modal" id="shopModal">
-                <div class="modal-content shop-modal-content">
-                    <button class="modal-close" id="shopModalClose">&times;</button>
-                    <div class="shop-modal-item">
-                        <div class="shop-modal-icon" id="shopModalIcon">📱</div>
-                        <div class="shop-modal-info">
-                            <h3 class="shop-modal-name" id="shopModalName">Item Name</h3>
-                            <p class="shop-modal-desc" id="shopModalDesc">Item description</p>
-                        </div>
-                    </div>
-                    <div class="shop-modal-cost">
-                        <div class="shop-modal-stamps">
-                            <span class="stamps-icon">⭐</span>
-                            <span class="stamps-amount" id="shopModalStamps">10</span>
-                            <span class="stamps-label">stamps</span>
-                        </div>
-                        <div class="shop-modal-balance">
-                            You have: <span id="shopModalBalance">0</span> stamps
-                        </div>
-                    </div>
-                    <div class="shop-modal-actions">
-                        <button class="btn btn-secondary" id="shopCancelBtn">Cancel</button>
-                        <button class="btn btn-primary" id="shopConfirmBtn">Redeem</button>
-                    </div>
-                    <p class="shop-modal-note" id="shopModalNote"></p>
-                </div>
-            </div>
-
-            <div class="passport-book">
-                <div class="passport-cover">
-                    <div class="passport-title">
-                        <span class="passport-jp">兎茶店</span>
-                        <span class="passport-en">Stamp Passport</span>
-                    </div>
-                    <div class="passport-owner" id="passportOwner">Guest</div>
-                </div>
-
-                <div class="passport-pages">
-                    <div class="stamp-grid" id="stampGrid">
-                        <!-- Stamps populated by JS -->
-                    </div>
-                </div>
-
-                <div class="passport-rewards">
-                    <h3>Rewards</h3>
-                    <div class="rewards-list" id="rewardsList">
-                        <!-- Rewards populated by JS -->
-                    </div>
-                </div>
-            </div>
-
-            <!-- Sticker Collection / Achievements -->
-            <div class="achievements-section">
-                <div class="section-header">
-                    <h3 class="section-title">Sticker Collection</h3>
-                    <p class="section-subtitle">collect achievements, earn bonus stamps!</p>
-                </div>
-
-                <!-- Achievement Stats -->
-                <div class="achievement-stats" id="achievementStats">
-                    <div class="achievement-stat">
-                        <span class="achievement-stat-value" id="achievementCount">0</span>
-                        <span class="achievement-stat-label">Stickers</span>
-                    </div>
-                    <div class="achievement-stat">
-                        <span class="achievement-stat-value" id="achievementTotal">/ 0</span>
-                        <span class="achievement-stat-label">Total</span>
-                    </div>
-                    <div class="achievement-stat">
-                        <span class="achievement-stat-value" id="achievementStamps">0</span>
-                        <span class="achievement-stat-label">Stamps Earned</span>
-                    </div>
-                </div>
-
-                <!-- Category Tabs -->
-                <div class="achievement-tabs" id="achievementTabs">
-                    <button class="achievement-tab active" data-category="all">All</button>
-                    <button class="achievement-tab" data-category="welcome">Welcome</button>
-                    <button class="achievement-tab" data-category="friendship">Friendship</button>
-                    <button class="achievement-tab" data-category="collector">Collector</button>
-                    <button class="achievement-tab" data-category="explorer">Explorer</button>
-                    <button class="achievement-tab" data-category="loyalty">Loyalty</button>
-                    <button class="achievement-tab" data-category="special">Special</button>
-                </div>
-
-                <!-- Achievement Grid -->
-                <div class="achievement-grid" id="achievementGrid">
-                    <!-- Achievements populated by JS -->
-                </div>
-            </div>
-
-            <!-- My Buns Dashboard -->
-            <div class="my-buns-section">
-                <div class="section-header">
-                    <h3 class="section-title">My Bun Collection</h3>
-                    <p class="section-subtitle">track your friendships & support</p>
-                </div>
-
-                <!-- Summary Stats -->
-                <div class="bun-summary-stats" id="bunSummaryStats">
-                    <div class="summary-stat">
-                        <span class="summary-icon">💰</span>
-                        <span class="summary-value" id="totalSpent">$0</span>
-                        <span class="summary-label">Total Spent</span>
-                    </div>
-                    <div class="summary-stat">
-                        <span class="summary-icon">🐰</span>
-                        <span class="summary-value" id="totalBunVisits">0</span>
-                        <span class="summary-label">Bun Visits</span>
-                    </div>
-                    <div class="summary-stat">
-                        <span class="summary-icon">💖</span>
-                        <span class="summary-value" id="highestFriendship">-</span>
-                        <span class="summary-label">Best Friend</span>
-                    </div>
-                    <div class="summary-stat">
-                        <span class="summary-icon">🏆</span>
-                        <span class="summary-value" id="topSupported">-</span>
-                        <span class="summary-label">Most Supported</span>
-                    </div>
-                </div>
-
-                <!-- Bun Collection Grid -->
-                <div class="bun-collection-grid" id="bunCollectionGrid">
-                    <!-- Bun cards populated by JS -->
-                </div>
-
-                <!-- Collection Progress -->
-                <div class="collection-progress">
-                    <div class="progress-header">
-                        <span class="progress-label">Friendship Progress</span>
-                        <span class="progress-count" id="friendshipCount">0/13 befriended</span>
-                    </div>
-                    <div class="progress-bar-large">
-                        <div class="progress-fill-large" id="friendshipProgressFill" style="width: 0%"></div>
-                    </div>
-                    <p class="progress-hint">Visit and give treats to increase friendship!</p>
-                </div>
-            </div>
-
-            <!-- Order & Visit History -->
-            <div class="history-section">
-                <div class="section-header">
-                    <h3 class="section-title">Your History</h3>
-                    <p class="section-subtitle">past orders and bun visits</p>
-                </div>
-
-                <div class="history-tabs">
-                    <button class="history-tab active" data-history="orders">Orders</button>
-                    <button class="history-tab" data-history="visits">Bun Visits</button>
-                </div>
-
-                <div class="history-content" id="historyContent">
-                    <!-- Populated by JS -->
-                </div>
-            </div>
-        </section>
-
-        <!-- SHOP PAGE -->
-        <section class="page page-shop" id="page-shop">
-            <div class="page-header">
-                <h2 class="page-title">Bunny Shop</h2>
-                <p class="page-subtitle">exclusive goodies for stamp collectors</p>
-            </div>
-
-            <div class="shop-grid" id="shopGrid">
-                <!-- Shop items populated by JS -->
-            </div>
-        </section>
-    </main>
-
-    <!-- Cart Sidebar -->
-    <aside class="cart-sidebar" id="cartSidebar">
-        <div class="cart-header">
-            <div class="cart-header-title">
-                <span class="cart-header-icon">🧋</span>
-                <h3>Your Order</h3>
-            </div>
-            <button class="cart-close" id="cartClose">&times;</button>
-        </div>
-        <div class="cart-items" id="cartItems">
-            <!-- Cart items populated by JS -->
-        </div>
-        <div class="cart-footer">
-            <div class="cart-summary" id="cartSummary">
-                <!-- Order summary populated by JS -->
-            </div>
-            <div class="cart-pickup">
-                <label for="pickupTime">Pickup Time</label>
-                <input type="datetime-local" id="pickupTime" class="pickup-input">
-            </div>
-            <button class="btn btn-primary btn-full" id="checkoutBtn">
-                <span class="checkout-text">Place Order</span>
-                <span class="checkout-total" id="checkoutTotal">$0.00</span>
-            </button>
-            <p class="cart-note">
-                <span class="cart-note-icon">⭐</span>
-                <span id="stampsPreview">+0 stamps with this order!</span>
-            </p>
-        </div>
-        <!-- Order Success Overlay -->
-        <div class="cart-success" id="cartSuccess">
-            <div class="cart-success-content">
-                <span class="success-icon">🎉</span>
-                <h3>Order Placed!</h3>
-                <p class="success-stamps" id="successStamps"></p>
-                <p class="success-message">See you soon!</p>
-            </div>
-        </div>
-    </aside>
-
-    <!-- Schedule Visit Modal -->
-    <div class="modal schedule-modal" id="scheduleModal">
-        <div class="modal-content schedule-modal-content">
-            <button class="modal-close" id="scheduleModalClose">&times;</button>
-            <h3>Schedule a Visit</h3>
-            <div class="schedule-form" id="scheduleForm">
-                <div class="form-group">
-                    <label>Choose a Rabbit</label>
-                    <select id="scheduleRabbit" class="form-select">
-                        <!-- Options populated by JS -->
-                    </select>
-                </div>
-
-                <!-- Dynamic Bun Preview -->
-                <div class="bun-preview" id="bunPreview">
-                    <!-- Populated by JS when bun is selected -->
-                </div>
-
-                <!-- Signature Items Upsell -->
-                <div class="signature-upsell" id="signatureUpsell">
-                    <!-- Populated by JS -->
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Select Date & Time</label>
-                        <input type="datetime-local" id="scheduleTime" class="form-input">
-                    </div>
-                    <div class="form-group">
-                        <label>Duration</label>
-                        <select id="scheduleDuration" class="form-select">
-                            <option value="15">15 min - $10</option>
-                            <option value="30" selected>30 min - $18</option>
-                            <option value="60">1 hour - $30</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="schedule-addons">
-                    <h4>Add Treats for Your Bun</h4>
-                    <p class="addon-hint">Treats increase friendship!</p>
-                    <div class="addon-grid treats-grid">
-                        <label class="addon-item">
-                            <input type="checkbox" class="treat-checkbox" value="premium-hay">
-                            <span class="addon-icon">🌾</span>
-                            <span class="addon-name">Premium Hay</span>
-                            <span class="addon-price">$3.00</span>
-                        </label>
-                        <label class="addon-item">
-                            <input type="checkbox" class="treat-checkbox" value="banana-chip">
-                            <span class="addon-icon">🍌</span>
-                            <span class="addon-name">Banana Chips</span>
-                            <span class="addon-price">$2.50</span>
-                        </label>
-                        <label class="addon-item">
-                            <input type="checkbox" class="treat-checkbox" value="apple-slice">
-                            <span class="addon-icon">🍎</span>
-                            <span class="addon-name">Apple Slices</span>
-                            <span class="addon-price">$2.00</span>
-                        </label>
-                        <label class="addon-item">
-                            <input type="checkbox" class="treat-checkbox" value="carrot-sticks">
-                            <span class="addon-icon">🥕</span>
-                            <span class="addon-name">Carrot Sticks</span>
-                            <span class="addon-price">$2.00</span>
-                        </label>
-                        <label class="addon-item">
-                            <input type="checkbox" class="treat-checkbox" value="herbal-mix">
-                            <span class="addon-icon">🌿</span>
-                            <span class="addon-name">Herbal Mix</span>
-                            <span class="addon-price">$4.00</span>
-                        </label>
-                        <label class="addon-item">
-                            <input type="checkbox" class="treat-checkbox" value="papaya-treats">
-                            <span class="addon-icon">🧡</span>
-                            <span class="addon-name">Papaya Treats</span>
-                            <span class="addon-price">$3.50</span>
-                        </label>
-                    </div>
-
-                    <h4>Add Toys for Your Bun</h4>
-                    <p class="addon-hint">Toys give bonus friendship points!</p>
-                    <div class="addon-grid toys-grid">
-                        <label class="addon-item">
-                            <input type="checkbox" class="toy-checkbox" value="willow-ball">
-                            <span class="addon-icon">⚽</span>
-                            <span class="addon-name">Willow Ball</span>
-                            <span class="addon-price">$5.00</span>
-                        </label>
-                        <label class="addon-item">
-                            <input type="checkbox" class="toy-checkbox" value="tunnel">
-                            <span class="addon-icon">🕳️</span>
-                            <span class="addon-name">Bunny Tunnel</span>
-                            <span class="addon-price">$12.00</span>
-                        </label>
-                        <label class="addon-item">
-                            <input type="checkbox" class="toy-checkbox" value="stacking-cups">
-                            <span class="addon-icon">🥤</span>
-                            <span class="addon-name">Stacking Cups</span>
-                            <span class="addon-price">$8.00</span>
-                        </label>
-                        <label class="addon-item">
-                            <input type="checkbox" class="toy-checkbox" value="dig-box">
-                            <span class="addon-icon">📦</span>
-                            <span class="addon-name">Dig Box</span>
-                            <span class="addon-price">$6.00</span>
-                        </label>
-                        <label class="addon-item">
-                            <input type="checkbox" class="toy-checkbox" value="treat-puzzle">
-                            <span class="addon-icon">🧩</span>
-                            <span class="addon-name">Treat Puzzle</span>
-                            <span class="addon-price">$10.00</span>
-                        </label>
-                        <label class="addon-item">
-                            <input type="checkbox" class="toy-checkbox" value="plush-carrot">
-                            <span class="addon-icon">🥕</span>
-                            <span class="addon-name">Plush Carrot</span>
-                            <span class="addon-price">$7.00</span>
-                        </label>
-                    </div>
-                </div>
-
-                <button class="btn btn-primary btn-full" id="confirmSchedule">Book Visit (+2 stamps)</button>
+            <div class="modal-footer">
+                <button class="btn btn-secondary modal-close-btn">Close</button>
             </div>
         </div>
     </div>
 
-    <!-- Toast Notifications -->
-    <!-- Footer -->
-    <footer class="site-footer">
-        <div class="footer-content">
-            <div class="footer-mascot">
-                <span class="footer-rabbit" title="*chomp*">🐰</span>
-                <span class="footer-knife">🔪</span>
-            </div>
-            <div class="footer-info">
-                <p class="footer-tagline">1-800-COME-GET-BIT</p>
-                <p class="footer-copy">© 2024 Megumi's Usagi Cafe | 兎茶店</p>
-            </div>
+    <!-- ============================================
+         BOTTOM BAR - Game Controls
+         ============================================ -->
+    <nav class="bottom-bar" id="bottomBar">
+        <div class="bottom-bar-logo">
+            <a href="#" data-location="outside">
+                <img src="images/logo_hero_2.svg" alt="Megumi's Usagi Cafe" class="logo-icon">
+            </a>
         </div>
-    </footer>
+        <div class="bottom-bar-center">
+            <button class="location-btn active" data-location="outside" id="btnOutside">
+                <span class="location-icon">🏠</span>
+                <span class="location-label">Outside</span>
+            </button>
+            <button class="location-btn" data-location="inside" id="btnInside">
+                <span class="location-icon">🏪</span>
+                <span class="location-label">Inside</span>
+            </button>
+        </div>
+        <div class="bottom-bar-right">
+            <button class="phone-toggle" id="phoneToggle">
+                📱
+                <span class="cart-badge" id="phoneCartBadge"></span>
+            </button>
+        </div>
+    </nav>
 
     <!-- Toast Notifications -->
     <div class="toast-container" id="toastContainer"></div>
