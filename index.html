@@ -555,12 +555,60 @@
         <div class="cart-items" id="cartItems">
             <!-- Cart items populated by JS -->
         </div>
+
+        <!-- Inline Bun Booking Widget -->
+        <div class="cart-bun-booking" id="cartBunBooking">
+            <div class="bun-booking-header" id="bunBookingToggle">
+                <div class="bun-booking-title">
+                    <span class="bun-booking-icon">🐰</span>
+                    <span>Add Bun Time</span>
+                </div>
+                <span class="bun-booking-expand">+</span>
+            </div>
+            <div class="bun-booking-content" id="bunBookingContent">
+                <div class="bun-booking-form">
+                    <div class="bun-booking-row">
+                        <label>Choose a Bun</label>
+                        <select id="cartBunSelect" class="form-select bun-select-compact">
+                            <!-- Populated by JS -->
+                        </select>
+                    </div>
+                    <div class="bun-booking-row">
+                        <label>Duration</label>
+                        <div class="duration-pills" id="durationPills">
+                            <button class="duration-pill" data-duration="15" data-price="8" data-credits="2">
+                                <span class="pill-time">15 min</span>
+                                <span class="pill-price">$8</span>
+                            </button>
+                            <button class="duration-pill active" data-duration="30" data-price="14" data-credits="3">
+                                <span class="pill-time">30 min</span>
+                                <span class="pill-price">$14</span>
+                            </button>
+                            <button class="duration-pill" data-duration="60" data-price="24" data-credits="5">
+                                <span class="pill-time">1 hour</span>
+                                <span class="pill-price">$24</span>
+                            </button>
+                        </div>
+                    </div>
+                    <button class="btn btn-secondary btn-full bun-booking-add" id="addBunToCartBtn">
+                        <span class="bun-add-icon">🐰</span>
+                        <span class="bun-add-text">Add to Order</span>
+                        <span class="bun-add-credits">3✨</span>
+                    </button>
+                    <p class="bun-booking-hint">Want treats & toys? <a href="#" id="openFullScheduleLink">Customize visit</a></p>
+                </div>
+            </div>
+        </div>
+
         <div class="cart-footer">
             <div class="cart-summary" id="cartSummary">
                 <!-- Order summary populated by JS -->
             </div>
             <div class="cart-pickup">
-                <label for="pickupTime">Pickup Time</label>
+                <label for="pickupTime">
+                    <span class="pickup-label-icon">📅</span>
+                    <span id="pickupLabel">Visit Time</span>
+                </label>
                 <input type="datetime-local" id="pickupTime" class="pickup-input">
             </div>
             <button class="btn btn-primary btn-full" id="checkoutBtn">
@@ -576,7 +624,10 @@
         <div class="cart-success" id="cartSuccess">
             <div class="cart-success-content">
                 <span class="success-icon">🎉</span>
-                <h3>Order Placed!</h3>
+                <h3 id="successTitle">Order Confirmed!</h3>
+                <div class="success-summary" id="successSummary">
+                    <!-- Populated by JS -->
+                </div>
                 <p class="success-stamps" id="successStamps"></p>
                 <p class="success-message">See you soon!</p>
             </div>

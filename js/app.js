@@ -921,9 +921,15 @@ function addSnackToCart(snackId, suppressUpsell = false) {
             showUpsellToast(snack.name, rabbit, 'snack');
         } else {
             showToast(`Added ${snack.name} to cart!`, snack.icon);
+            // Show bun time cross-sell for non-signature items
+            setTimeout(showBunTimeCrossSell, 1500);
         }
     } else {
         showToast(`Added ${snack.name} to cart!`, snack.icon);
+        // Show bun time cross-sell for non-signature items
+        if (!suppressUpsell) {
+            setTimeout(showBunTimeCrossSell, 1500);
+        }
     }
 
     // Bounce the cart button
@@ -1066,7 +1072,146 @@ function initCart() {
 
     checkoutBtn.addEventListener('click', handleCheckout);
 
+    // Initialize inline bun booking widget
+    initInlineBunBooking();
+
     renderCart();
+}
+
+// ============================================
+// INLINE BUN BOOKING (in cart)
+// ============================================
+function initInlineBunBooking() {
+    const bunBookingWidget = document.getElementById('cartBunBooking');
+    const bunBookingToggle = document.getElementById('bunBookingToggle');
+    const bunSelect = document.getElementById('cartBunSelect');
+    const durationPills = document.querySelectorAll('.duration-pill');
+    const addBunBtn = document.getElementById('addBunToCartBtn');
+    const openFullScheduleLink = document.getElementById('openFullScheduleLink');
+
+    if (!bunBookingWidget || !bunSelect) return;
+
+    // Populate the bun select dropdown
+    populateCartBunSelect();
+
+    // Toggle expand/collapse
+    bunBookingToggle.addEventListener('click', () => {
+        bunBookingWidget.classList.toggle('expanded');
+    });
+
+    // Duration pill selection
+    durationPills.forEach(pill => {
+        pill.addEventListener('click', (e) => {
+            e.preventDefault();
+            durationPills.forEach(p => p.classList.remove('active'));
+            pill.classList.add('active');
+            updateBunBookingButton();
+        });
+    });
+
+    // Add bun to cart button
+    addBunBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        addBunFromInlineWidget();
+    });
+
+    // Link to open full schedule modal (for treats & toys)
+    openFullScheduleLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        const selectedRabbitId = bunSelect.value;
+        // Close cart sidebar
+        document.getElementById('cartSidebar').classList.remove('open');
+        // Open full schedule modal with selected rabbit
+        openScheduleModal(selectedRabbitId);
+        // Collapse the inline widget
+        bunBookingWidget.classList.remove('expanded');
+    });
+
+    // Update button when rabbit selection changes
+    bunSelect.addEventListener('change', updateBunBookingButton);
+
+    // Initial button update
+    updateBunBookingButton();
+}
+
+function populateCartBunSelect() {
+    const bunSelect = document.getElementById('cartBunSelect');
+    if (!bunSelect) return;
+
+    bunSelect.innerHTML = RABBITS.map(rabbit => {
+        const friendshipLevel = getFriendshipLevelForRabbit(rabbit.id);
+        return `<option value="${rabbit.id}">${rabbit.name} ${friendshipLevel.icon}</option>`;
+    }).join('');
+}
+
+function updateBunBookingButton() {
+    const bunSelect = document.getElementById('cartBunSelect');
+    const activePill = document.querySelector('.duration-pill.active');
+    const creditsDisplay = document.querySelector('.bun-add-credits');
+
+    if (!bunSelect || !activePill || !creditsDisplay) return;
+
+    const credits = activePill.dataset.credits;
+    creditsDisplay.textContent = `${credits}✨`;
+}
+
+function addBunFromInlineWidget() {
+    const bunSelect = document.getElementById('cartBunSelect');
+    const activePill = document.querySelector('.duration-pill.active');
+    const bunBookingWidget = document.getElementById('cartBunBooking');
+
+    if (!bunSelect || !activePill) return;
+
+    const rabbitId = bunSelect.value;
+    const duration = parseInt(activePill.dataset.duration, 10);
+
+    // Check credit availability
+    const visitOption = getVisitOption(duration);
+    const creditCost = visitOption.credits;
+    const currentCartCredits = calculateCartCreditCost();
+    const availableCredits = getCreditsRemaining();
+
+    if (currentCartCredits + creditCost > availableCredits) {
+        showToast(`Not enough credits! Need ${creditCost} more.`, '⏰');
+        return;
+    }
+
+    // Add visit to cart (without treats/toys - quick add)
+    addVisitToCart(rabbitId, duration, [], []);
+
+    // Collapse the widget and hide it (since visit is now in cart)
+    bunBookingWidget.classList.remove('expanded');
+    updateBunBookingVisibility();
+
+    // Reset to default duration
+    document.querySelectorAll('.duration-pill').forEach(p => p.classList.remove('active'));
+    document.querySelector('.duration-pill[data-duration="30"]').classList.add('active');
+    updateBunBookingButton();
+}
+
+function updateBunBookingVisibility() {
+    const bunBookingWidget = document.getElementById('cartBunBooking');
+    if (!bunBookingWidget) return;
+
+    // Hide if there's already a visit in cart
+    const hasVisit = state.cart.some(item => item.type === 'visit');
+    bunBookingWidget.classList.toggle('has-visit', hasVisit);
+}
+
+function updateTimeLabel(hasVisit, hasFood) {
+    const pickupLabel = document.getElementById('pickupLabel');
+    if (!pickupLabel) return;
+
+    // Determine appropriate label based on cart contents
+    if (hasVisit && hasFood) {
+        pickupLabel.textContent = 'Visit Time';
+    } else if (hasVisit) {
+        pickupLabel.textContent = 'Visit Time';
+    } else if (hasFood) {
+        pickupLabel.textContent = 'Pickup Time';
+    } else {
+        pickupLabel.textContent = 'Visit Time';
+    }
 }
 
 function addToCart(drinkId, suppressUpsell = false) {
@@ -1094,9 +1239,15 @@ function addToCart(drinkId, suppressUpsell = false) {
             showUpsellToast(drink.name, rabbit, 'drink');
         } else {
             showToast(`Added ${drink.name} to cart!`, '🧋');
+            // Show bun time cross-sell for non-signature items
+            setTimeout(showBunTimeCrossSell, 1500);
         }
     } else {
         showToast(`Added ${drink.name} to cart!`, '🧋');
+        // Show bun time cross-sell for non-signature items
+        if (!suppressUpsell) {
+            setTimeout(showBunTimeCrossSell, 1500);
+        }
     }
 
     // Bounce the cart button
@@ -1256,6 +1407,12 @@ function renderCart() {
     }
 
     cartItems.innerHTML = itemsHtml;
+
+    // Update bun booking widget visibility
+    updateBunBookingVisibility();
+
+    // Update pickup/visit time label based on cart contents
+    updateTimeLabel(visits.length > 0, drinks.length > 0 || snacks.length > 0);
 }
 
 // Render a drink item in the cart
@@ -1443,7 +1600,7 @@ function handleCheckout() {
 
     const pickupTime = document.getElementById('pickupTime').value;
     if (!pickupTime) {
-        showToast('Please select a pickup time!', '⏰');
+        showToast('Please select a visit time!', '📅');
         return;
     }
 
@@ -1570,22 +1727,44 @@ function handleCheckout() {
         }
     }
 
-    // Show success overlay
+    // Show success overlay with unified summary
     const cartSuccess = document.getElementById('cartSuccess');
+    const successTitle = document.getElementById('successTitle');
+    const successSummary = document.getElementById('successSummary');
     const successStamps = document.getElementById('successStamps');
 
-    let successMessage = '';
-    if (stampsEarned > 0) {
-        successMessage = `+${stampsEarned} stamp${stampsEarned !== 1 ? 's' : ''} earned!`;
+    // Set appropriate title based on order contents
+    if (visitsCount > 0 && (drinksCount > 0 || snacksCount > 0)) {
+        successTitle.textContent = 'Cafe Visit Booked!';
+    } else if (visitsCount > 0) {
+        successTitle.textContent = 'Bun Time Booked!';
+    } else {
+        successTitle.textContent = 'Order Confirmed!';
+    }
+
+    // Build summary items
+    let summaryHtml = '';
+    if (drinksCount > 0) {
+        summaryHtml += `<div class="success-item"><span class="success-item-icon">🧋</span><span>${drinksCount} drink${drinksCount !== 1 ? 's' : ''}</span></div>`;
+    }
+    if (snacksCount > 0) {
+        summaryHtml += `<div class="success-item"><span class="success-item-icon">🍡</span><span>${snacksCount} snack${snacksCount !== 1 ? 's' : ''}</span></div>`;
     }
     if (visitsCount > 0) {
-        const bunNames = visits.map(v => RABBITS.find(r => r.id === v.rabbitId)?.name || 'Bun').join(', ');
-        successMessage += successMessage ? ` 🐰 ${bunNames}` : `Enjoy your visit with ${bunNames}!`;
+        const bunNames = visits.map(v => RABBITS.find(r => r.id === v.rabbitId)?.name || 'Bun');
+        bunNames.forEach(name => {
+            summaryHtml += `<div class="success-item success-item-bun"><span class="success-item-icon">🐰</span><span>Time with ${name}</span></div>`;
+        });
     }
-    if (!successMessage) {
-        successMessage = 'Thanks for your order!';
+    successSummary.innerHTML = summaryHtml;
+
+    // Show stamps earned
+    if (stampsEarned > 0) {
+        successStamps.innerHTML = `<span class="stamp-earned">+${stampsEarned}</span> stamp${stampsEarned !== 1 ? 's' : ''} earned!`;
+    } else {
+        successStamps.textContent = 'Thanks for your order!';
     }
-    successStamps.textContent = successMessage;
+
     cartSuccess.classList.add('show');
 
     // Check for newly unlocked rewards
@@ -2089,6 +2268,12 @@ function handleScheduleVisit() {
 
     // Add visit to cart (checkout handles all tracking)
     addVisitToCart(rabbitId, duration, selectedTreats, selectedToys);
+
+    // Sync the visit time to the cart's unified time field
+    const cartPickupTime = document.getElementById('pickupTime');
+    if (cartPickupTime && visitTime) {
+        cartPickupTime.value = visitTime;
+    }
 
     // Clear checkboxes
     document.querySelectorAll('.treat-checkbox, .toy-checkbox').forEach(cb => cb.checked = false);
@@ -3551,6 +3736,98 @@ function dismissUpsell(btn) {
         toast.classList.add('toast-out');
         setTimeout(() => toast.remove(), 300);
     }
+}
+
+// Show bun time cross-sell for non-signature items when no visit in cart
+function showBunTimeCrossSell() {
+    // Don't show if already have a visit in cart
+    if (state.cart.some(item => item.type === 'visit')) return;
+
+    // Don't show if recently dismissed (use session storage to remember)
+    const dismissedUntil = sessionStorage.getItem('bunTimeCrossSellDismissed');
+    if (dismissedUntil && Date.now() < parseInt(dismissedUntil)) return;
+
+    // Only show after 2+ items in cart
+    const itemCount = state.cart.reduce((sum, item) => {
+        if (item.type === 'visit') return sum;
+        return sum + (item.quantity || 1);
+    }, 0);
+    if (itemCount < 2) return;
+
+    const container = document.getElementById('toastContainer');
+
+    // Remove any existing cross-sell toasts
+    container.querySelectorAll('.toast-crosssell').forEach(t => t.remove());
+
+    // Pick a random rabbit for the suggestion
+    const randomRabbit = RABBITS[Math.floor(Math.random() * RABBITS.length)];
+    const friendshipLevel = getFriendshipLevelForRabbit(randomRabbit.id);
+
+    const toast = document.createElement('div');
+    toast.className = 'toast toast-crosssell';
+
+    toast.innerHTML = `
+        <div class="crosssell-content">
+            <img src="${randomRabbit.image}" alt="${randomRabbit.name}" class="crosssell-bun-img">
+            <div class="crosssell-info">
+                <span class="crosssell-label">Complete your visit?</span>
+                <span class="crosssell-desc">Spend time with a bun while you enjoy your order!</span>
+            </div>
+        </div>
+        <div class="crosssell-actions">
+            <button class="crosssell-btn crosssell-btn-primary" onclick="expandBunBookingFromToast()">
+                🐰 Add Bun Time
+            </button>
+            <button class="crosssell-btn crosssell-btn-dismiss" onclick="dismissCrossSell(this)">
+                Not Now
+            </button>
+        </div>
+    `;
+
+    container.appendChild(toast);
+
+    // Auto-dismiss after 6 seconds
+    setTimeout(() => {
+        if (toast.parentNode) {
+            toast.classList.add('toast-out');
+            setTimeout(() => toast.remove(), 300);
+        }
+    }, 6000);
+}
+
+// Open inline bun booking widget from cross-sell toast
+function expandBunBookingFromToast() {
+    // Dismiss the toast
+    document.querySelectorAll('.toast-crosssell').forEach(t => {
+        t.classList.add('toast-out');
+        setTimeout(() => t.remove(), 300);
+    });
+
+    // Open cart if not open
+    const cartSidebar = document.getElementById('cartSidebar');
+    if (!cartSidebar.classList.contains('open')) {
+        cartSidebar.classList.add('open');
+        lockScroll();
+    }
+
+    // Expand the bun booking widget
+    const bunBookingWidget = document.getElementById('cartBunBooking');
+    if (bunBookingWidget) {
+        bunBookingWidget.classList.add('expanded');
+        // Scroll the cart to show the booking widget
+        bunBookingWidget.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+}
+
+// Dismiss cross-sell toast (remember for session)
+function dismissCrossSell(btn) {
+    const toast = btn.closest('.toast-crosssell');
+    if (toast) {
+        toast.classList.add('toast-out');
+        setTimeout(() => toast.remove(), 300);
+    }
+    // Don't show again for 5 minutes
+    sessionStorage.setItem('bunTimeCrossSellDismissed', Date.now() + (5 * 60 * 1000));
 }
 
 // ============================================
