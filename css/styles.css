@@ -1618,9 +1618,10 @@ h3 { font-size: clamp(1.25rem, 3vw, 1.75rem); }
 
 /* ---------- Inline Bun Booking Widget ---------- */
 .cart-bun-booking {
-    border-top: 1px solid var(--lavender);
+    border-top: 2px solid var(--accent-pink);
     background: linear-gradient(135deg, var(--cream) 0%, #fff5f8 100%);
     flex-shrink: 0; /* Don't let flexbox shrink this */
+    min-height: 48px; /* Ensure minimum visibility */
 }
 
 .bun-booking-header {
